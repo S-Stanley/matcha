@@ -28,6 +28,11 @@ If not yet, activate virtual env
 . .venv/bin/activate
 ```
 
+Setup postgres container:
+```
+docker-compose up --build -d database
+```
+
 Launch the API in dev mode
 
 ```python
