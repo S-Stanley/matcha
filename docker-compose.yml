@@ -1,0 +1,11 @@
+services:
+  database:
+    image: postgres:14.7
+    container_name: matcha-postgres
+    environment:
+      - POSTGRES_USER=matcha
+      - POSTGRES_PASSWORD=matcha
+      - POSTGRES_DB=matcha
+    ports:
+      - 5432:5432
+    restart: always
