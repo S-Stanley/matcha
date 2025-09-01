@@ -29,8 +29,13 @@ If not yet, activate virtual env
 ```
 
 Setup postgres container:
-```
+```bash
 docker-compose up --build -d database
+```
+
+Init or re-create database schema from scratch
+```bash
+./scripts/reset-local-db.sh
 ```
 
 Launch the API in dev mode
