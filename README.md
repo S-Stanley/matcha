@@ -5,13 +5,13 @@
 Create virtual env
 
 ```python
-python3 -m venv .venv
+python3 -m venv venv
 ```
 
 Activate virtual env
 
 ```python
-. .venv/bin/activate
+source venv/bin/activate
 ```
 
 Install dependencies
@@ -25,7 +25,7 @@ pip3 install -r requirements.txt
 If not yet, activate virtual env
 
 ```python
-. .venv/bin/activate
+source venv/bin/activate
 ```
 
 Setup postgres container:
@@ -40,6 +40,12 @@ Init or re-create database schema from scratch
 
 Launch the API in dev mode
 
-```python
+```bash
 flask --app services/api/main.py run
+```
+
+OR 
+
+```bash
+./scripts/up.sh
 ```
