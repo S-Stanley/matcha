@@ -1,1 +1,1 @@
-from .users import CREATE_USER
+from .users import CREATE_USER, GET_USER_BY_EMAIL, GET_USER_PASSWORD

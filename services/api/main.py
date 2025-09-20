@@ -15,5 +15,7 @@ conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
 
 @app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+def get_status():
+    return jsonify({
+        "status": "OK"
+    })

@@ -14,7 +14,19 @@ def create_user():
             "firstname": new_user["firstname"],
             "lastname": new_user["lastname"],
             "username": new_user["username"],
-        })
+            "token": new_user["token"],
+        }), 201
     except Exception as e:
         print(e)
-        return "Error"
+        return "Error", 500
+
+@blueprint.route("/users/login", methods=['POST'])
+def connect_user():
+    try: 
+        user = handlers.users.connect_user(request.form);
+        if not user:
+            return "Error", 401
+        return jsonify(user)
+    except Exception as e:
+        print(e)
+        return "Error", 500
