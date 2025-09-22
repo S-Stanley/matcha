@@ -15,6 +15,8 @@ def create_user():
             return "Username already exist", 400
         if utils.check_new_user_input_len(request.form) is False:
             return "Somes input are too long", 400
+        if utils.check_password_not_commun(request.form['password']) is False:
+            return "Password is too common", 400
         new_user = handlers.users.create_user(request.form);
         if not new_user:
             return "Error", 400
