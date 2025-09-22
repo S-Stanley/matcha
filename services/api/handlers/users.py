@@ -37,10 +37,34 @@ def get_user_password(email):
         )
         user = cur.fetchone()
         conn.commit()
+    if user is None:
+        return False
     return user[0]
 
 def check_user_password(password, hashed_password):
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+def get_user_by_username(username):
+    with conn.cursor() as cur:
+        user = cur.execute(
+            sql.users.GET_USER_BY_USERNAME,
+            (
+                username,
+            )
+        )
+        user = cur.fetchone()
+        conn.commit()
+    print(user)
+    if user is None:
+        return False
+    return {
+        "id": user[0],
+        "email": user[1],
+        "firstname": user[2],
+        "lastname": user[3],
+        "username": user[4],
+        "token": user[5],
+    }
 
 def get_user_by_email(email):
     with conn.cursor() as cur:
@@ -52,7 +76,8 @@ def get_user_by_email(email):
         )
         user = cur.fetchone()
         conn.commit()
-    print(user)
+    if user is None:
+        return False
     return {
         "id": user[0],
         "email": user[1],

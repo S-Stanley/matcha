@@ -29,6 +29,18 @@ GET_USER_BY_EMAIL = '''
     WHERE email=%s
 '''
 
+GET_USER_BY_USERNAME = '''
+    SELECT
+        id,
+        email,
+        firstname,
+        lastname,
+        username,
+        token
+    FROM "User"
+    WHERE username=%s
+'''
+
 GET_USER_PASSWORD = '''
     SELECT 
         password

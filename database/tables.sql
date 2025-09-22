@@ -1,10 +1,10 @@
 CREATE TABLE "User" (
   id              UUID            NOT NULL DEFAULT gen_random_uuid(),
-  email           VARCHAR(50)     NOT NULL,
+  email           VARCHAR(50)     NOT NULL UNIQUE,
   firstname       VARCHAR(50)     NOT NULL,
   lastname        VARCHAR(50)     NOT NULL,
-  username        VARCHAR(50)     NOT NULL,
-  token           VARCHAR(36)     NOT NULL,
+  username        VARCHAR(50)     NOT NULL UNIQUE,
+  token           VARCHAR(36)     NOT NULL UNIQUE,
   password        VARCHAR(150)    NOT NULL,
   created_at      timestamp       DEFAULT NOW()
 );
