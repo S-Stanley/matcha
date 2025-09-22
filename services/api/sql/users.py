@@ -45,5 +45,5 @@ GET_USER_PASSWORD = '''
     SELECT 
         password
     FROM "User"
-    WHERE email=%s
+    WHERE username=%s
 '''

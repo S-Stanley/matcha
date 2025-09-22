@@ -27,12 +27,12 @@ def create_user(data):
         "token": new_user[5],
     }
 
-def get_user_password(email):
+def get_user_password(username):
     with conn.cursor() as cur:
         user = cur.execute(
             sql.users.GET_USER_PASSWORD,
             (
-                email,
+                username,
             )
         )
         user = cur.fetchone()
@@ -89,11 +89,11 @@ def get_user_by_email(email):
 
 
 def connect_user(data):
-    hashed_password = get_user_password(data['email'])
+    hashed_password = get_user_password(data['username'])
     if not hashed_password:
         print("User does not exist")
     if not check_user_password(data['password'], hashed_password):
         print("Wrong password")
         return False
-    return get_user_by_email(data['email'])
+    return get_user_by_username(data['username'])
 
