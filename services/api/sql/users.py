@@ -47,3 +47,9 @@ GET_USER_PASSWORD = '''
     FROM "User"
     WHERE username=%s
 '''
+
+DISCONNECT_USER = '''
+    UPDATE "User"
+    SET token=NULL
+    WHERE id=%s
+'''

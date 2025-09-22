@@ -42,3 +42,14 @@ def connect_user():
     except Exception as e:
         print(e)
         return "Error", 500
+
+@blueprint.route("/users/logout", methods=['POST'])
+def disconnect_user():
+    try: 
+        user = handlers.users.disconnect_user(request.form['id']);
+        if not user:
+            return "User does not exist", 401
+        return True, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500

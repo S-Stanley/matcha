@@ -87,6 +87,16 @@ def get_user_by_email(email):
         "token": user[5],
     }
 
+def disconnect_user(user_id):
+    with conn.cursor() as cur:
+        user = cur.execute(
+            sql.users.DISCONNECT_USER,
+            (
+                user_id,
+            )
+        )
+        print(user)
+        conn.commit()
 
 def connect_user(data):
     hashed_password = get_user_password(data['username'])
