@@ -107,3 +107,17 @@ def connect_user(data):
         return False
     return get_user_by_username(data['username'])
 
+def get_user_by_token(token):
+    try:
+        with conn.cursor() as cur:
+            user = cur.execute(
+                sql.users.GET_USER_BY_TOKEN,
+                (
+                    token,
+                )
+            )
+            new_user = cur.fetchone()
+            conn.commit()
+            return user
+    except Exception as e:
+        return false
