@@ -116,8 +116,35 @@ def get_user_by_token(token):
                     token,
                 )
             )
-            new_user = cur.fetchone()
+            found_user = cur.fetchone()
             conn.commit()
-            return user
+            return {
+                "id": found_user[0],
+                "email": found_user[1],
+                "firstname": found_user[2],
+                "lastname": found_user[3],
+                "username": found_user[4],
+                "token": found_user[5],
+            }
     except Exception as e:
         return false
+
+def patch_user(data, actual_user):
+    try:
+        with conn.cursor() as cur:
+            user = cur.execute(
+                sql.users.PATCH_USER,
+                (
+                    data['email'] if 'email' in data else actual_user['email'],
+                    actual_user['id']
+                )
+            )
+            updated_user = cur.fetchone()
+            conn.commit()
+            return {
+                "id": updated_user[0],
+                "email": updated_user[1]
+            }
+    except Exception as e:
+        print(e)
+        return False

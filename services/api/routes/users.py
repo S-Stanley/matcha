@@ -53,3 +53,17 @@ def disconnect_user():
     except Exception as e:
         print(e)
         return "Error", 500
+
+@blueprint.route("/users", methods=['PATCH'])
+def patch_user():
+    try:
+        actual_user = handlers.get_user_by_token(request.headers.get("token"))
+        if not actual_user:
+            return "Error", 400
+        update_user = handlers.patch_user(request.form, actual_user)
+        if not update_user:
+            return "Error", 400
+        return update_user, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500

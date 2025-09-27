@@ -65,3 +65,10 @@ DISCONNECT_USER = '''
     SET token=NULL
     WHERE id=%s
 '''
+
+PATCH_USER = '''
+    UPDATE "User"
+    SET email=%s
+    WHERE id=%s
+    RETURNING id, email
+'''
