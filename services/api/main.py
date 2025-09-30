@@ -20,6 +20,8 @@ _UNPROTECTED_ROUTES_ = {
 
 def isProtectedRoute(method, path):
     unprotectedRoutesOnMethod = _UNPROTECTED_ROUTES_.get(method)
+    if not unprotectedRoutesOnMethod:
+        return False
     unprotectedRoutesOnPath = path in unprotectedRoutesOnMethod
     return False if unprotectedRoutesOnPath else True
 
