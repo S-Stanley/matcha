@@ -21,3 +21,15 @@ curl -X POST http://127.0.0.1:5000/users/login -d username=3 -d password=2
 ```bash
 curl -X POST http://127.0.0.1:5000/users/logout -d id=xxxx
 ```
+
+#### Update user
+
+```bash
+curl -X PATCH http://127.0.0.1:5000/users -d email=4 -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
+
+#### Get user me
+
+```bash
+curl http://127.0.0.1:5000/users/me -H token:5f737066-f767-4235-bbde-8765a7edff18
+```

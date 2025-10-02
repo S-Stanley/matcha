@@ -4,6 +4,13 @@ import psycopg2, os
 
 import handlers, utils
 
+@blueprint.route("/users/me", methods=['GET'])
+def get_user_me():
+    user = handlers.get_user_by_token(request.headers.get("token"))
+    if not user:
+        return "Error", 400
+    return user, 200
+
 @blueprint.route("/users", methods=['POST'])
 def create_user():
     try:
