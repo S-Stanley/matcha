@@ -1,4 +1,5 @@
 INSERT INTO "User" (
+  id,
   email,
   username,
   firstname,
@@ -6,6 +7,7 @@ INSERT INTO "User" (
   password,
   token
 ) VALUES (
+  'f8dd18fe-35dc-4fc1-8b69-f7586686fc80',
   'user@matcha.com',
   'user-matcha',
   'user',

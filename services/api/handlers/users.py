@@ -66,6 +66,26 @@ def get_user_by_username(username):
         "token": user[5],
     }
 
+def get_user_by_id(user_id):
+    with conn.cursor() as cur:
+        user = cur.execute(
+            sql.users.GET_USER_BY_ID,
+            (
+                user_id,
+            )
+        )
+        user = cur.fetchone()
+        conn.commit()
+    if user is None:
+        return False
+    return {
+        "id": user[0],
+        "firstname": user[1],
+        "lastname": user[2],
+        "username": user[3],
+    }
+
+
 def get_user_by_email(email):
     with conn.cursor() as cur:
         user = cur.execute(

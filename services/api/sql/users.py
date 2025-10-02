@@ -29,6 +29,16 @@ GET_USER_BY_EMAIL = '''
     WHERE email=%s
 '''
 
+GET_USER_BY_ID = '''
+    SELECT
+        id,
+        firstname,
+        lastname,
+        username
+    FROM "User"
+    WHERE id=%s
+'''
+
 GET_USER_BY_TOKEN = '''
     SELECT
         id,

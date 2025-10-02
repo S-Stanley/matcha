@@ -11,6 +11,15 @@ def get_user_me():
         return "Error", 400
     return user, 200
 
+@blueprint.route("/users/<user_id>", methods=['GET'])
+def get_user_by_id(user_id):
+    try:
+        user = handlers.get_user_by_id(user_id)
+        return user, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
+
 @blueprint.route("/users", methods=['POST'])
 def create_user():
     try:
