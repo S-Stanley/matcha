@@ -46,7 +46,10 @@ GET_USER_BY_TOKEN = '''
         firstname,
         lastname,
         username,
-        token
+        token,
+        bio,
+        gender,
+        preference
     FROM "User"
     WHERE token=%s
 '''
@@ -78,7 +81,14 @@ DISCONNECT_USER = '''
 
 PATCH_USER = '''
     UPDATE "User"
-    SET email=%s
+    SET
+        email=%s,
+        firstname=%s,
+        lastname=%s,
+        bio=%s,
+        gender=%s,
+        preference=%s,
+        username=%s
     WHERE id=%s
-    RETURNING id, email
+    RETURNING id, email, firstname, lastname, bio, gender, preference, username
 '''

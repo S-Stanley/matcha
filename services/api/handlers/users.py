@@ -115,7 +115,6 @@ def disconnect_user(user_id):
                 user_id,
             )
         )
-        print(user)
         conn.commit()
 
 def connect_user(data):
@@ -145,9 +144,13 @@ def get_user_by_token(token):
                 "lastname": found_user[3],
                 "username": found_user[4],
                 "token": found_user[5],
+                "bio": found_user[6],
+                "gender": found_user[7],
+                "preference": found_user[8],
             }
     except Exception as e:
-        return false
+        print(e)
+        return False
 
 def patch_user(data, actual_user):
     try:
@@ -156,6 +159,12 @@ def patch_user(data, actual_user):
                 sql.users.PATCH_USER,
                 (
                     data['email'] if 'email' in data else actual_user['email'],
+                    data['firstname'] if 'firstname' in data else actual_user['firstname'],
+                    data['lastname'] if 'lastname' in data else actual_user['lastname'],
+                    data['bio'] if 'bio' in data else None,
+                    data['gender'] if 'gender' in data else None,
+                    data['preference'] if 'preference' in data else None,
+                    data['username'] if 'username' in data else actual_user['username'],
                     actual_user['id']
                 )
             )
@@ -163,7 +172,13 @@ def patch_user(data, actual_user):
             conn.commit()
             return {
                 "id": updated_user[0],
-                "email": updated_user[1]
+                "email": updated_user[1],
+                "firstname": updated_user[2],
+                "lastname": updated_user[3],
+                "bio": updated_user[4],
+                "gender": updated_user[5],
+                "preference": updated_user[6],
+                "username": updated_user[7]
             }
     except Exception as e:
         print(e)

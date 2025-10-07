@@ -70,11 +70,29 @@ def disconnect_user():
         print(e)
         return "Error", 500
 
+GENDER = [
+  'MALE',
+  'FEMALE',
+  'OTHERS',
+  'DO NOT PRONONCE'
+]
+PREFERENCE = [
+  'MALE',
+  'FEMALE',
+  'BOTH'
+]
+
 @blueprint.route("/users", methods=['PATCH'])
 def patch_user():
     try:
         actual_user = handlers.get_user_by_token(request.headers.get("token"))
         if not actual_user:
+            return "Error", 400
+        if 'gender' in request.form and request.form['gender'] not in GENDER:
+            print("Genre wrong value")
+            return "Error", 400
+        if 'preference' in request.form and request.form['preference'] not in PREFERENCE:
+            print("Preferences wrong value")
             return "Error", 400
         update_user = handlers.patch_user(request.form, actual_user)
         if not update_user:
