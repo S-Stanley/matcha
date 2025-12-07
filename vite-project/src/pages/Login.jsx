@@ -1,31 +1,30 @@
 import "../CSS/Login.css";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const navigate = useNavigate();
+
   return (
     <div className="login-container">
       <div className="login-box">
-        <h1 className="login-title">Connexion</h1>
+        <h1 className="login-title">Se connecter</h1>
 
-        <input
-          className="login-input"
-          type="text"
-          placeholder="Email"
-        />
+        <div className="div-button-register">
+            <p className="button-register">Pas encore de compte ?</p>
+            <p className="button-register-color" onClick={() => navigate("/register")} style={{ cursor: "pointer" }}>
+                S'inscrire
+            </p>
+        </div>
 
-        <input
-          className="login-input"
-          type="password"
-          placeholder="Mot de passe"
-        />
+        <input className="login-input" type="text" placeholder="Email" />
+        <input className="login-input" type="password" placeholder="Mot de passe" />
 
-        <p className="forgotpassword-button" onClick={() => alert("Tu as cliqué")} style={{cursor:"pointer"}}>
+        <p className="forgotpassword-button" style={{cursor:"pointer"}}>
             Mot de passe oublié ?
         </p>
 
         <button className="login-button">Se connecter</button>
-        <p className="forgotpassword-button" onClick={() => alert("Tu as cliqué")} style={{cursor:"pointer"}}>
-            Pas encore de compte ? S'inscrire
-        </p>
+
       </div>
     </div>
   );

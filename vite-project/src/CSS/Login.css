@@ -12,6 +12,22 @@
   .forgotpassword-button {
     color: black;
   }
+
+  .button-register {
+    color: black;
+  }
+  
+  .button-register-color {
+    color: blue;
+    text-decoration: underline;
+  }
+  
+  .div-button-register {
+      display: flex;
+      justify-content: center;
+      align-items: center;     
+      gap: 10px;              
+  }
   
   /* On ajoute un bloc/fond */
   .login-box {
