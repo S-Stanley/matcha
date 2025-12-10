@@ -1,0 +1,64 @@
+/* Centrage de l'ensemble de la page */
+.completeprofile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100vw;
+  height: 100vh;
+
+  background-image: url("/picture-register2.jpg");
+  background-size: cover;       /* L’image couvre tout */
+  background-position: center;  /* Centrée */
+  background-repeat: no-repeat;
+}
+
+/* Bloc principal */
+.completeprofile-page {
+  width: 70%; /* Largeur du panneau */
+  max-width: 800px; 
+  min-height: 70vh;
+  padding: 40px;
+
+  background: rgba(255, 255, 255, 0.65); /* Blanc + transparence */
+  backdrop-filter: blur(5px); /* Effet verre flou moderne */
+  
+  border-radius: 12px; /* Coins arrondis */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Ombre douce */
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+}
+
+/* BOUTON */
+.choices-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.choice-circle {
+  padding: 12px 25px;
+  border: 2px solid #777;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  font-weight: 500;
+}
+
+.choice-circle:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+
+.choice-circle.selected {
+  background-color: #ff4d79;
+  color: white;
+  border-color: #ff4d79;
+  box-shadow: 0 4px 12px rgba(255, 77, 120, 0.4);
+}
+
+/* --------------------------------------------- */

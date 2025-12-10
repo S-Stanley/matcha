@@ -3,7 +3,7 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  background-color: #ecdede;
+  background-color: #e6dddd;
 }
 
 /* Zone gauche (image) */
@@ -21,9 +21,9 @@
   justify-content: center;
   bottom: 100px;
   color: white;
-  font-size: 2rem;
-  font-weight: 600;
-  text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.7);
+  font-size: 2.5rem;
+  font-weight: 500;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
 }
 
 
@@ -98,4 +98,29 @@
   font-size: 2rem;
   font-weight: 600;
   color: #333;
+}
+
+/* CARROUSSEL */
+.carousel-dots {
+  position: absolute;
+  bottom: 100px;     /* distance du bas de l'image */
+  left: 50%;
+  transform: translateX(-50%);
+  
+  display: flex;
+  gap: 8px;
+}
+
+/* Les petits traits */
+.dot {
+  width: 40px;
+  height: 4px;
+  background-color: #bfbfbf; /* gris */
+  border-radius: 3px;
+  transition: background-color 0.3s;
+}
+
+/* Celui en cours */
+.dot.active {
+  background-color: white;
 }

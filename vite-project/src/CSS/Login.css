@@ -1,13 +1,30 @@
 /* Centrage de l'ensemble de la page */
 .login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    gap: 16px;
-    background-color: #f5f6fa;
-  }
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: #e6dddd;
+}
+
+/* Zone gauche (image) */
+.login-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* Zone droite (formulaire) */
+.login-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+}
 
   .forgotpassword-button {
     color: black;

@@ -6,26 +6,32 @@ function Login() {
 
   return (
     <div className="login-container">
-      <div className="login-box">
-        <h1 className="login-title">Se connecter</h1>
-
-        <div className="div-button-register">
-            <p className="button-register">Pas encore de compte ?</p>
-            <p className="button-register-color" onClick={() => navigate("/register")} style={{ cursor: "pointer" }}>
-                S'inscrire
-            </p>
+        <div className="login-left">
+            <img src="/picture-register2.jpg" alt="register" className="register-image" />
+            <p className="register-text">Rencontre maintenant</p>
         </div>
 
-        <input className="login-input" type="text" placeholder="Email" />
-        <input className="login-input" type="password" placeholder="Mot de passe" />
+        <div className="login-right">
+            <h1 className="login-title">Se connecter</h1>
+            <div className="div-button-register">
+                <p className="button-register">Pas encore de compte ?</p>
+                <p className="button-register-color" onClick={() => navigate("/register")} style={{ cursor: "pointer" }}>
+                    S'inscrire
+                </p>
+            </div>
+            
 
-        <p className="forgotpassword-button" style={{cursor:"pointer"}}>
-            Mot de passe oublié ?
-        </p>
+            <input className="login-input" type="text" placeholder="Email" />
+            <input className="login-input" type="password" placeholder="Mot de passe" />
 
-        <button className="login-button">Se connecter</button>
+            <p className="forgotpassword-button" style={{cursor:"pointer"}}>
+                Mot de passe oublié ?
+            </p>
 
-      </div>
+            <button className="login-button" onClick={() => navigate("/CompleteProfile")} style={{ cursor: "pointer" }}>
+                    Se connecter
+            </button>
+        </div>
     </div>
   );
 }
