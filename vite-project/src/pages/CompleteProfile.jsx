@@ -88,14 +88,16 @@ function CompleteProfile() {
         {current.type === "summary" && (
           <div className="summary-box">
 
-            <div className="summary-item">
-              <h3>Genre</h3>
-              <p>{answers.gender}</p>
-            </div>
+            <div class="summary-info1">
+              <div className="summary-item">
+                <h3>Genre</h3>
+                <p>{answers.gender}</p>
+              </div>
 
-            <div className="summary-item">
-              <h3>Préférence</h3>
-              <p>{answers.preference}</p>
+              <div className="summary-item">
+                <h3>Préférence</h3>
+                <p>{answers.preference}</p>
+              </div>
             </div>
 
             <div className="summary-item">
@@ -105,8 +107,13 @@ function CompleteProfile() {
 
             <div className="summary-item">
               <h3>Loisirs</h3>
-              <p>{answers.hobby.join(", ")}</p>
+              <div className="hobby-badges">
+                {answers.hobby.map((h) => (
+                  <span key={h} className="hobby-badge">{h}</span>
+                ))}
+              </div>
             </div>
+
 
             <div className="summary-item">
               <h3>Photos</h3>
