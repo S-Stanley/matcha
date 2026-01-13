@@ -1,6 +1,30 @@
 import "../CSS/Register.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { createUser } from "../api";
+
+function validate(form) {
+    if (Object.values(form).some(v => v.trim() === "")) {
+        return "Tous les champs sont obligatoires.";
+    }
+
+    if (
+        form.email.length > 50 ||
+        form.username.length > 50 ||
+        form.firstname.length > 50 ||
+        form.lastname.length > 50 ||
+        form.password.length > 50
+    ) {
+        return "Tous les champs doivent faire moins de 50 caractères.";
+    }
+
+    const weak = ["cat", "dog", "password", "123456"];
+    if (weak.includes(form.password.toLowerCase())) {
+        return "Mot de passe trop faible.";
+    }
+
+    return null;
+}
 
 function Register() {
     const navigate = useNavigate();
@@ -32,45 +56,42 @@ function Register() {
     // -------------------------------
     // 🔥 Fonction pour envoyer le formulaire
     // -------------------------------
+    const [loading, setLoading] = useState(false);
+
     const handleRegister = async () => {
-
-        // --- VALIDATIONS FRONTEND ---
-        if (Object.values(form).some(v => v.trim() === "")) {
-            return setError("Tous les champs sont obligatoires.");
+        if (loading) return;
+    
+        // 🔒 Validation FRONT stricte (indispensable ici)
+        if (
+            !form.email ||
+            !form.password ||
+            !form.username ||
+            !form.firstname ||
+            !form.lastname
+        ) {
+            setError("Tous les champs sont obligatoires.");
+            return;
         }
-
-        if (form.email.length > 50 || form.username.length > 50) {
-            return setError("Email et pseudo doivent faire moins de 50 caractères.");
+    
+        const validationError = validate(form);
+        if (validationError) {
+            setError(validationError);
+            return;
         }
-
-        const weakPasswords = ["cat", "dog", "password", "123456"];
-        if (weakPasswords.includes(form.password.toLowerCase())) {
-            return setError("Mot de passe trop faible.");
-        }
-
+    
+        setError(null);
+        setLoading(true);
+    
         try {
-            const response = await fetch("http://127.0.0.1:5000/users", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: new URLSearchParams(form).toString(),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                return setError(data.error || "Erreur serveur");
-            }
-
-            // 🎉 Succès : rediriger vers login
+            await createUser(form);
             navigate("/");
-
         } catch (err) {
-            console.error(err);
-            setError("Impossible de contacter le serveur");
+            setError(err.message || "Erreur lors de l'inscription");
+        } finally {
+            setLoading(false);
         }
     };
+    
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -111,8 +132,8 @@ function Register() {
                 <input className="login-input" name="email" type="text" placeholder="Email" onChange={handleChange} />
                 <input className="login-input" name="password" type="password" placeholder="Mot de passe" onChange={handleChange} />
 
-                <button className="login-button" onClick={handleRegister}>
-                    Créer mon compte
+                <button className="login-button" onClick={handleRegister} disabled={loading}>
+                    {loading ? "Création..." : "Créer mon compte"}
                 </button>
             </div>
         </div>

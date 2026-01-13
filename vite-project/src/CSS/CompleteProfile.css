@@ -27,7 +27,7 @@
   min-height: 70vh;
   padding: 40px;
 
-  background: rgba(255, 255, 255, 0.65); /* Blanc + transparence */
+  background: rgba(19, 3, 3, 0.65); /* Blanc + transparence */
   backdrop-filter: blur(5px); /* Effet verre flou moderne */
   
   border-radius: 12px; /* Coins arrondis */
@@ -65,9 +65,9 @@
 }
 
 .choice-circle.selected {
-  background-color: #ff4d79;
+  background-color: #790a26;
   color: white;
-  border-color: #ff4d79;
+  border-color: #790a26;
   box-shadow: 0 4px 12px rgba(255, 77, 120, 0.4);
 }
 
@@ -83,7 +83,7 @@
 
 .next-button, .prev-button, .complete-button {
   padding: 10px 40px;
-  background-color: #ff4d79;
+  background-color: #790a26;
   color: white;
   border-radius: 6px;
   cursor: pointer;
@@ -108,7 +108,7 @@
   padding: 10px 14px;
   border-radius: 30px;
   color: #333333;
-  border-color: #ff4d79;
+  border-color: #790a26;
   background-color: white;
   border: 1px solid #ccc;
   font-size: 1rem;
@@ -134,8 +134,8 @@
 }
 
 .upload-box:hover {
-  border-color: #ff4d79;
-  color: #ff4d79;
+  border-color: #790a26;
+  color: #790a26;
 }
 
 .upload-box input {
@@ -163,7 +163,7 @@
   position: absolute;
   top: -8px;
   right: -8px;
-  background: #ff4d79;
+  background: #790a26;
   border: none;
   color: white;
   border-radius: 50%;
@@ -283,7 +283,7 @@
     font-weight: 750;
     letter-spacing: 0.02em;
   
-    background: linear-gradient(135deg, #ff4d79 0%, #ff7aa2 100%);
+    background: linear-gradient(135deg, #790a26 0%, #790a26 100%);
     box-shadow: 0 18px 45px rgba(255, 77, 121, 0.38);
   
     cursor: pointer;

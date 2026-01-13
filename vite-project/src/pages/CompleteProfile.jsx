@@ -1,8 +1,9 @@
 import "../CSS/CompleteProfile.css";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function CompleteProfile() {
-
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
 
   const [answers, setAnswers] = useState({
@@ -74,8 +75,9 @@ function CompleteProfile() {
   // --- CONFIRMATION FINALE ---
   const confirmProfile = () => {
     console.log("Profil final :", answers);
-    alert("Profil confirmé !");
+    navigate("/home", { replace: true });
   };
+  
 
   return (
     <div className="completeprofile-container">

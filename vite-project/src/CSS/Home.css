@@ -1,0 +1,38 @@
+.home-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ff6b6b, #feca57);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: sans-serif;
+    text-align: center;
+  }
+  
+  .home-title {
+    font-size: 3rem;
+    margin-bottom: 10px;
+  }
+  
+  .home-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+  }
+  
+  .home-card {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 25px 35px;
+    border-radius: 15px;
+    backdrop-filter: blur(8px);
+  }
+  
+  .home-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .home-card li {
+    margin: 8px 0;
+  }
+  
