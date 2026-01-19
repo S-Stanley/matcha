@@ -75,7 +75,7 @@ function CompleteProfile() {
   // --- CONFIRMATION FINALE ---
   const confirmProfile = () => {
     console.log("Profil final :", answers);
-    navigate("/home", { replace: true });
+    navigate("/match", { replace: true });
   };
   
 

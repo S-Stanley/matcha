@@ -15,28 +15,28 @@ function Match() {
   <div className="top-bar">
     <div className="top-center">
       <span className="top-item active">Match</span>
+      <span className="top-item">Recherche</span>
       <span className="top-item">Messages</span>
       <span className="top-item">Profil</span>
     </div>
       <button className="logout-button">Se déconnecter</button> 
   </div>
-
-    {/* 🎯 Contenu centré */}
     <div className="match-content">
-      <h1 className="match-title">💘 Match</h1>
+      <div className="profil">
+        <div className="photo-container">
+          <div className="match-card-picture">
+            <p>PHOTO</p>
+          </div>
 
-      <p className="match-subtitle">
-        Bienvenue ! Ton profil est bien créé 🎉
-      </p>
+          <div className="match-actions">
+            <button className="icon-btn pass">✖</button>
+            <button className="icon-btn match">❤</button>
+          </div>
+        </div>
 
-      <div className="match-card">
-        <p>🚧 Page Match en cours de construction</p>
-        <p>Prochaines étapes :</p>
-        <ul>
-          <li>Swipe / Match</li>
-          <li>Messages</li>
-          <li>Profil</li>
-        </ul>
+        <div className="match-card-description">
+          <p>DESCRIPTION</p>
+        </div>
       </div>
     </div>
   </div>
