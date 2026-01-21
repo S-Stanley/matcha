@@ -20,6 +20,12 @@ Install dependencies
 pip3 install -r requirements.txt
 ```
 
+At the root of the project
+
+```bash
+cp .env.local .env
+```
+
 ## Run project
 
 If not yet, activate virtual env

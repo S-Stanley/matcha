@@ -25,16 +25,22 @@ def create_user():
     try:
         existing_email = handlers.users.get_user_by_email(request.form['email'])
         if existing_email:
+            print("Email already exist")
             return "Email already exist", 400
         existing_username = handlers.users.get_user_by_username(request.form['username'])
         if existing_username:
+            print("Username already exist")
             return "Username already exist", 400
         if utils.check_new_user_input_len(request.form) is False:
+            print("Somes input are too long")
             return "Somes input are too long", 400
         if utils.check_password_not_commun(request.form['password']) is False:
+            print("Password is too common")
             return "Password is too common", 400
         new_user = handlers.users.create_user(request.form);
+        print(new_user)
         if not new_user:
+            print("Error while trying to create user", not new_user)
             return "Error", 400
         return jsonify({
             "id": new_user["id"],

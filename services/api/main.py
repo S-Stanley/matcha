@@ -2,11 +2,13 @@ from flask import Flask, request, jsonify
 import os, psycopg2, json
 from dotenv import load_dotenv
 from routes import blueprint
+from flask_cors import CORS
 
 import routes.users
 import handlers
 
 app = Flask(__name__)
+CORS(app)
 
 load_dotenv()
 
