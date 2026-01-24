@@ -22,7 +22,7 @@ function Match() {
       <button className="logout-button">Se déconnecter</button> 
   </div>
     <div className="match-content">
-      <div className="profil">
+      <div className="profile">
         <div className="photo-container">
           <div className="match-card-picture">
             <p>PHOTO</p>

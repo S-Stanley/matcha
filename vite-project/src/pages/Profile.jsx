@@ -1,0 +1,185 @@
+import "../CSS/Profile.css";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+function Profile() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/");
+  };
+
+  /* =======================
+     STATE PROFIL UTILISATEUR
+     ======================= */
+
+  const [profile, setProfile] = useState({
+    firstName: "Nathan",
+    lastName: "Bechon",
+    email: "nbechon@email.com",
+    gender: "Homme",
+    sexualPreference: "Femmes",
+    bio: "blablabla",
+    tags: ["sport", "cinema"],
+    popularity: 42,
+    location: {
+      city: "Paris",
+      gpsEnabled: false,
+    },
+    photos: [
+      { id: 1, url: null, isProfile: true },
+      { id: 2, url: null, isProfile: false },
+      { id: 3, url: null, isProfile: false },
+    ],
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  /* =======================
+     VUES & LIKES (DEMO)
+     ======================= */
+
+  const [views, setViews] = useState([
+    { username: "User42", date: "2026-01-20" },
+    { username: "Emma", date: "2026-01-22" },
+  ]);
+
+  const [likes, setLikes] = useState([
+    { username: "Lucas", date: "2026-01-21" },
+  ]);
+
+  /* =======================
+     LOCALISATION GPS
+     ======================= */
+
+  const requestGPSLocation = () => {
+    if (!navigator.geolocation) {
+      alert("La géolocalisation n’est pas supportée");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setProfile((prev) => ({
+          ...prev,
+          location: {
+            gpsEnabled: true,
+            city: "Quartier détecté (GPS)",
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          },
+        }));
+      },
+      () => {
+        alert("Autorisation GPS refusée");
+      }
+    );
+  };
+
+  return (
+    <div className="myprofile-container">
+
+      {/* TOP BAR */}
+      <div className="top-bar">
+        <div className="top-center">
+          <span className="top-item">Match</span>
+          <span className="top-item">Recherche</span>
+          <span className="top-item">Messages</span>
+          <span className="top-item active">Profil</span>
+        </div>
+        <button className="logout-button" onClick={handleLogout}>
+          Se déconnecter
+        </button>
+      </div>
+
+      <div className="myprofile-content">
+        <div className="myprofile">
+
+          <div className="photo-container">
+            <div className="myprofile-card-picture">
+              {profile.photos.find(p => p.isProfile && p.url) ? (
+                <img
+                  src={profile.photos.find(p => p.isProfile).url}
+                  alt="Photo de profil"
+                />
+              ) : (
+                <p>PHOTO DE PROFIL</p>
+              )}
+            </div>
+          </div>
+
+          <div className="myprofile-card-description">
+            <h2>
+              {profile.firstName} {profile.lastName}
+            </h2>
+
+            <p className="popularity">
+              ⭐ Popularité : {profile.popularity}
+            </p>
+
+            <p><strong>Genre :</strong> {profile.gender}</p>
+            <p><strong>Préférences :</strong> {profile.sexualPreference}</p>
+            <p><strong>Email :</strong> {profile.email}</p>
+
+            <p className="bio">{profile.bio}</p>
+
+            <div className="tags">
+              {profile.tags.map((tag, index) => (
+                <span key={index} className="tag">#{tag}</span>
+              ))}
+            </div>
+
+            <div className="location">
+              <p>
+                <strong>Localisation :</strong>{" "}
+                {profile.location.city}
+              </p>
+
+              {!profile.location.gpsEnabled && (
+                <button onClick={requestGPSLocation}>
+                  Activer GPS
+                </button>
+              )}
+            </div>
+
+            <button
+              className="edit-profile-btn"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? "Fermer" : "Modifier le profil"}
+            </button>
+          </div>
+
+          <div className="myprofile-stats">
+            <h3>Activité</h3>
+
+            <div>
+              <strong>Consultations :</strong>
+              <ul>
+                {views.map((view, i) => (
+                  <li key={i}>
+                    {view.username} – {view.date}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <strong>Likes reçus :</strong>
+              <ul>
+                {likes.map((like, i) => (
+                  <li key={i}>
+                    {like.username} – {like.date}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Profile;

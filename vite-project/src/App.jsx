@@ -3,6 +3,7 @@ import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import CompleteProfile from './pages/CompleteProfile.jsx'
 import Match from './pages/Match.jsx'
+import Profile from './pages/Profile.jsx'
 import './App.css'
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/completeprofile" element={<CompleteProfile />} />
         <Route path="/match" element={<Match />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   )

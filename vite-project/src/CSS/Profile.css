@@ -1,0 +1,131 @@
+.myprofile-container {
+    width: 100vw;
+    min-height: 100vh;
+    color: #000000;
+    background-color: white;
+    font-family: "Segoe UI", Roboto, sans-serif;
+  }
+  
+.myprofile-content {
+    min-height: calc(100vh - 60px);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    background: rgba(170, 24, 58, 0.107);
+}
+  
+.myprofile {
+    display: flex;
+    width: 80%;
+    height: 80%;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 32px 48px;
+    gap: 40px;
+}
+  
+.photo-container {
+    flex: 0 0 420px;
+}
+  
+.myprofile-card-picture {
+    height: 100%;
+    border-radius: 18px;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+  
+.myprofile-card-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+  
+.myprofile-card-description {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 24px;
+}
+  
+.myprofile-card-description h2 {
+    font-size: 26px;
+    font-weight: 700;
+}
+  
+.popularity {
+    font-size: 15px;
+    margin-bottom: 16px;
+}
+  
+.bio {
+    margin-top: 12px;
+    padding: 14px;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+  
+.tags {
+    margin-top: 16px;
+}
+  
+.tag {
+    font-size: 13px;
+    padding: 7px 12px;
+}
+  
+.location {
+    margin-top: 16px;
+}
+  
+.edit-profile-btn {
+    max-width: 300px;
+    margin-top: 24px;
+}
+  
+.myprofile-stats {
+    flex: 0 0 280px;
+    padding-left: 32px;
+    border-left: 1px solid #2a2a3c;
+    margin-top: 0;
+}
+  
+  .myprofile-stats h3 {
+    font-size: 17px;
+  }
+  
+  /* =========================
+     RESPONSIVE (MOBILE)
+     ========================= */
+  
+  @media (max-width: 900px) {
+    .myprofile {
+      flex-direction: column;
+      padding: 20px;
+    }
+  
+    .photo-container {
+      flex: none;
+      height: 320px;
+    }
+  
+    .myprofile-stats {
+      border-left: none;
+      border-top: 1px solid #2a2a3c;
+      padding-left: 0;
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+  }
+  
