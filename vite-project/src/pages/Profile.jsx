@@ -79,19 +79,6 @@ function Profile() {
   return (
     <div className="myprofile-container">
 
-      {/* TOP BAR */}
-      <div className="top-bar">
-        <div className="top-center">
-          <span className="top-item">Match</span>
-          <span className="top-item">Recherche</span>
-          <span className="top-item">Messages</span>
-          <span className="top-item active">Profil</span>
-        </div>
-        <button className="logout-button" onClick={handleLogout}>
-          Se déconnecter
-        </button>
-      </div>
-
       <div className="myprofile-content">
         <div className="myprofile">
 

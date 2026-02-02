@@ -1,8 +1,7 @@
 .myprofile-container {
     width: 100vw;
-    min-height: 100vh;
     color: #000000;
-    background-color: white;
+    background: white;
     font-family: "Segoe UI", Roboto, sans-serif;
   }
   

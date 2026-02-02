@@ -1,0 +1,72 @@
+.message-container {
+    min-height: 100vh;
+    background: white;
+    font-family: sans-serif;
+  }
+  
+  /* Contenu */
+  .message-content {
+    min-height: calc(100vh - 60px);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    background: rgba(170, 24, 58, 0.107);
+  }
+
+  .message {
+    width: 90%;
+    max-width: 80%;   /* largeur confortable */
+    color: black;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+  }
+  
+  
+  /* Conversation */
+  .conversation-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    
+    padding: 15px;
+    border-bottom: 1px solid #eaeaea;
+    cursor: pointer;
+    background: white;
+  
+    transition: background 0.2s;
+  }
+  
+  .conversation-item:hover {
+    background: #f2f2f2;
+  }
+  
+  /* Avatar */
+  .conversation-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  /* Texte */
+  .conversation-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .conversation-name {
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .conversation-last {
+    font-size: 14px;
+    color: #777;
+    margin: 2px 0 0;
+  }
+  

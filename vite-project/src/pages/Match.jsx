@@ -12,15 +12,6 @@ function Match() {
   return (
     <div className="match-container">
 
-  <div className="top-bar">
-    <div className="top-center">
-      <span className="top-item active">Match</span>
-      <span className="top-item">Recherche</span>
-      <span className="top-item">Messages</span>
-      <span className="top-item">Profil</span>
-    </div>
-      <button className="logout-button">Se déconnecter</button> 
-  </div>
     <div className="match-content">
       <div className="profile">
         <div className="photo-container">

@@ -1,9 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import MainLayout from "./UI/MainLayout";
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import CompleteProfile from './pages/CompleteProfile.jsx'
 import Match from './pages/Match.jsx'
 import Profile from './pages/Profile.jsx'
+import Message from './pages/Message.jsx'
+import Recherche from './pages/Recherche.jsx'
 import './App.css'
 
 function App() {
@@ -13,8 +16,12 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/completeprofile" element={<CompleteProfile />} />
-        <Route path="/match" element={<Match />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route element={<MainLayout />}>
+          <Route path="/match" element={<Match />} />
+          <Route path="/recherche" element={<Recherche />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/message" element={<Message />} />
+        </Route>
       </Routes>
     </Router>
   )
