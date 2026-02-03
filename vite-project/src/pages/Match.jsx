@@ -11,25 +11,24 @@ function Match() {
 
   return (
     <div className="match-container">
+      <div className="match-content">
+        <div className="profile">
+          <div className="photo-container">
+            <div className="match-card-picture">
+              <p>PHOTO</p>
+            </div>
 
-    <div className="match-content">
-      <div className="profile">
-        <div className="photo-container">
-          <div className="match-card-picture">
-            <p>PHOTO</p>
+            <div className="match-actions">
+              <button className="icon-btn pass">✖</button>
+              <button className="icon-btn match">❤</button>
+            </div>
           </div>
 
-          <div className="match-actions">
-            <button className="icon-btn pass">✖</button>
-            <button className="icon-btn match">❤</button>
+          <div className="match-card-description">
+            <p>DESCRIPTION</p>
           </div>
-        </div>
-
-        <div className="match-card-description">
-          <p>DESCRIPTION</p>
         </div>
       </div>
-    </div>
   </div>
   );
 }

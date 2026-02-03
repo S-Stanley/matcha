@@ -1,7 +1,8 @@
 .message-container {
-    min-height: 100vh;
+    width: 100vw;
+    color: #000000;
     background: white;
-    font-family: sans-serif;
+    font-family: "Segoe UI", Roboto, sans-serif;
   }
   
   /* Contenu */

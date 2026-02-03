@@ -22,12 +22,15 @@
     gap: 40px;
   }
   
-  .top-item {
+  .top-item{
     font-size: 18px;
     font-weight: 500;
     color: white;
     cursor: pointer;
     position: relative;
+    padding: 6px 10px;
+    border-radius: 10px;
+    transition: color .2s ease, text-shadow .2s ease, transform .2s ease, background .2s ease;
   }
   
   .top-item.active {
@@ -35,15 +38,40 @@
     font-weight: 600;
   }
   
-  .top-item.active::after {
-    content: "";
-    position: absolute;
-    bottom: -8px;
-    left: 0;
-    width: 100%;
+  .top-item::after{
+    content:"";
+    position:absolute;
+    left: 10px;
+    right: 10px;
+    bottom: -7px;
     height: 3px;
-    background-color: white;
-    border-radius: 2px;
+    border-radius: 99px;
+    background: rgba(255,255,255,.9);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform .2s ease;
+  }
+  
+  .top-item:hover{
+    color: #fff;
+    background: rgba(255,255,255,.08);
+    text-shadow: 0 0 10px rgba(255, 210, 220, .55);
+    transform: translateY(-1px);
+  }
+  
+  .top-item:hover::after{
+    transform: scaleX(1);
+  }
+
+  .top-item.active{
+    color: #fff;
+    font-weight: 700;
+    background: rgba(255,255,255,.14);
+    text-shadow: 0 0 12px rgba(255, 210, 220, .65);
+  }
+  
+  .top-item.active::after{
+    transform: scaleX(1);
   }
   
   .logout-button {
