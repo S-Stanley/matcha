@@ -5,6 +5,7 @@ from routes import blueprint
 from flask_cors import CORS
 
 import routes.users
+import routes.views
 import handlers
 
 app = Flask(__name__)
