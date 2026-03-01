@@ -6,6 +6,7 @@ from flask_cors import CORS
 
 import routes.users
 import routes.views
+import routes.likes
 import handlers
 
 app = Flask(__name__)

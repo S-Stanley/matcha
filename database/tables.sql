@@ -29,4 +29,11 @@ CREATE TABLE "View" (
   id              UUID            NOT NULL DEFAULT gen_random_uuid(),
   profile_user_id UUID            NOT NULL references "User"(id),
   viewer_user_id  UUID            NOT NULL references "User"(id)
-)
+);
+
+CREATE TABLE "Like" (
+  id              UUID            NOT NULL DEFAULT gen_random_uuid(),
+  liked_by        UUID            NOT NULL references "User"(id),
+  liked_user      UUID            NOT NULL references "User"(id),
+  created_at      timestamp       DEFAULT NOW()
+);
