@@ -18,3 +18,17 @@ def create_like(data):
         "likedBy": new_like[1],
         "libedUser": new_like[2],
     }
+
+def get_like_list(user_id):
+    with conn.cursor() as cur:
+        req = cur.execute(
+            sql.like.GET_LIKE_LIST,
+            (
+                user_id,
+            )
+        )
+        req = cur.fetchall()
+        conn.commit()
+        if req is None:
+            return False
+        return req
