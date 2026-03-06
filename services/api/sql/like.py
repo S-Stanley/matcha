@@ -17,3 +17,9 @@ GET_LIKE_LIST = '''
     FROM "Like"
     WHERE liked_user = %s
 '''
+
+CHECK_IF_USER_IS_LIKING_BACK = '''
+    SELECT id
+    FROM "Like"
+    WHERE liked_user=%s AND liked_by=%s
+'''

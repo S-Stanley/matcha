@@ -12,8 +12,23 @@ def create_like():
         "liked_by": user['id'],
         "liked_user": request.form['liked_user']
     })
-    print("like_created", like_created)
-    return like_created, 200
+    is_new_match = False
+    if handlers.should_create_match({
+        "liked_by": user['id'],
+        "liked_user": request.form['liked_user']
+    }):
+        print("It's a match!")
+        is_new_match = handlers.init_new_match([
+            user['id'],
+            request.form['liked_user']
+        ])
+    else:
+        print("It is not a match..")
+    return {
+        "like": like_created,
+        "is_new_match": True if is_new_match else False,
+        "match": is_new_match if is_new_match else None
+    }, 200
 
 @blueprint.route("/likes", methods=['GET'])
 def get_user_like():
