@@ -17,7 +17,6 @@ def get_all_profile_view(profileUserId):
     return req
 
 def create_view(data):
-    print(data)
     with conn.cursor() as cur:
         view = cur.execute(
             sql.views.CREATE_VIEW,

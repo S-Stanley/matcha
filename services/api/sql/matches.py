@@ -1,3 +1,7 @@
+IS_USER_MEMBER_OF_MATCH = '''
+    SELECT id FROM "MatchMember" WHERE match_id=%s and user_id=%s;
+'''
+
 CREATE_MATCH = '''
     INSERT INTO "Match" DEFAULT VALUES
     RETURNING id, created_at

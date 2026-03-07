@@ -51,6 +51,23 @@ def check_if_match_exist(userIds):
         "created_at": req[1]
     } if (req is not None and len(req) >= 1 and req[0]) else None
 
+def is_user_member_of_match(data):
+    with conn.cursor() as cur:
+        try:
+            cur.execute(
+                sql.matches.IS_USER_MEMBER_OF_MATCH,
+                (
+                    data['match_id'],
+                    data['user_id'],
+                )
+            )
+            req = cur.fetchone()
+            conn.commit()
+            return True if req else None
+        except Exception as e:
+            print(e)
+            return False
+
 def init_new_match(userIds):
     if len(userIds) != 2:
         return False

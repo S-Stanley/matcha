@@ -49,3 +49,11 @@ CREATE TABLE "MatchMember" (
   match_id        UUID            NOT NULL references "Match"(id),
   created_at      timestamp       DEFAULT NOW()
 );
+
+CREATE TABLE "Messages" (
+  id              UUID            NOT NULL DEFAULT gen_random_uuid(),
+  user_id         UUID            NOT NULL references "User"(id),
+  match_id        UUID            NOT NULL references "Match"(id),
+  content         TEXT            NOT NULL,
+  created_at      timestamp       DEFAULT NOW()
+);
