@@ -75,7 +75,7 @@ GET_USER_PASSWORD = '''
 
 DISCONNECT_USER = '''
     UPDATE "User"
-    SET token=NULL
+    SET token=gen_random_uuid()
     WHERE id=%s
 '''
 
