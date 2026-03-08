@@ -65,6 +65,7 @@ def get_user_by_username(username):
         "lastname": user[3],
         "username": user[4],
         "token": user[5],
+        "confirm_code": user[6],
     }
 
 def get_user_by_id(user_id):
@@ -125,7 +126,11 @@ def connect_user(data):
     if not check_user_password(data['password'], hashed_password):
         print("Wrong password")
         return False
-    return get_user_by_username(data['username'])
+    user = get_user_by_username(data['username'])
+    if user['confirm_code']:
+        print("Email is not confirmed")
+        return False
+    return user
 
 def get_user_by_token(token):
     try:

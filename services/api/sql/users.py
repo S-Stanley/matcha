@@ -61,7 +61,8 @@ GET_USER_BY_USERNAME = '''
         firstname,
         lastname,
         username,
-        token
+        token,
+        confirm_code
     FROM "User"
     WHERE username=%s
 '''
