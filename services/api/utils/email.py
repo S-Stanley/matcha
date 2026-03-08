@@ -44,3 +44,10 @@ def send_signup_confirmation_email(dest, confirmation_code):
         subject="Matcha: Please confirm your email",
         content="Your matcha confirmation code is: {}".format(confirmation_code)
     )
+
+def send_password_update_request_email(dest, confirmation_code):
+    return send_email(
+        dest=dest,
+        subject="Matcha: you have requested a new password",
+        content="Your matcha new password request confirmation code is: {}".format(confirmation_code)
+    )

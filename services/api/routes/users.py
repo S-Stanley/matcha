@@ -99,6 +99,16 @@ PREFERENCE = [
   'BOTH'
 ]
 
+@blueprint.route("/users/password/change/request", methods=['POST'])
+def request_new_password():
+    is_request_successful = handlers.request_new_password(
+        username=request.form['username'],
+        password=request.form['password'],
+    )
+    if not is_request_successful:
+        return { "requested": False }, 400
+    return { "requested": True }, 200
+
 @blueprint.route("/users", methods=['PATCH'])
 def patch_user():
     try:

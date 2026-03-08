@@ -32,7 +32,7 @@ curl -X POST http://127.0.0.1:5000/users/signup/confirm -d confirm_code="xxx" -d
 curl -X POST http://127.0.0.1:5000/users/logout -d id=xxxx
 ```
 
-#### Update user
+## Update user
 
 ```bash
 curl -X PATCH http://127.0.0.1:5000/users -d email=4 -d firstname=firstname -d lastname=lastname -d bio=bio -d gender=MALE -d preference=FEMALE -d username=username -H token:5f737066-f767-4235-bbde-8765a7edff18
@@ -42,14 +42,21 @@ curl -X PATCH http://127.0.0.1:5000/users -d email=4 -d firstname=firstname -d l
 * Preference enum values: MALE, FEMALE, BOTH
 * Gender enum values: MALE, FEMALE, OTHERS, DO NOT PRONONCE
 
-#### Get user me
+## Get user me
 
 ```bash
 curl http://127.0.0.1:5000/users/me -H token:5f737066-f767-4235-bbde-8765a7edff18
 ```
 
-#### Get user by id
+## Get user by id
  
 ```
 curl http://127.0.0.1:5000/users/f8dd18fe-35dc-4fc1-8b69-f7586686fc80 -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
+
+
+## Request new password:
+
+```bash
+curl http://127.0.0.1:5000/users/password/change/request -H token:5f737066-f767-4235-bbde-8765a7edff18 -d username=3 -d password=new-pass
 ```

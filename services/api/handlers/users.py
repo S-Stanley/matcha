@@ -1,6 +1,30 @@
-import psycopg2, os, sql, bcrypt, uuid
+import psycopg2, os, sql, bcrypt, uuid, utils
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+
+def request_new_password(username, password):
+    user = get_user_by_username(username)
+    if not user:
+        return False
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
+    with conn.cursor() as cur:
+        req = cur.execute(
+            sql.new_password_request.CREATE_PASSWORD_REQUEST,
+            (
+                user['id'],
+                hashed_password,
+            )
+        )
+        req = cur.fetchone()
+        conn.commit()
+        utils.email.send_password_update_request_email(
+            dest={
+                "email": user['email'],
+                "name": user['firstname'],
+            },
+            confirmation_code=req[0]
+        )
+    return True
 
 def delete_confirmation_code(user_id):
     with conn.cursor() as cur:
@@ -40,7 +64,9 @@ def create_user(data):
         "email": new_user[1],
         "firstname": new_user[2],
         "lastname": new_user[3],
-        "username": new_user[4]
+        "username": new_user[4],
+        "token": new_user[5],
+        "confirm_code": new_user[6],
     }
 
 def get_user_password(username):
