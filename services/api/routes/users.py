@@ -38,10 +38,14 @@ def create_user():
             print("Password is too common")
             return "Password is too common", 400
         new_user = handlers.users.create_user(request.form);
-        print(new_user)
         if not new_user:
             print("Error while trying to create user", not new_user)
             return "Error", 400
+        if not utils.send_signup_confirmation_email(
+            dest={"email": new_user['email'], "name": new_user['firstname']},
+            confirmation_code="xx"
+        ):
+            return "Error sending email", 400
         return jsonify({
             "id": new_user["id"],
             "email": new_user["email"],
