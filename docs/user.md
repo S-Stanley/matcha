@@ -10,10 +10,20 @@ curl -X POST http://127.0.0.1:5000/users -d email=email@student.42.fr -d passwor
 * Email and username are unique
 * Not common English keyword as password: cat, dog, etc..
 
+Do not return token, email should be confirmed. An email with the confirmation code is sent to the email adress.
+
 ## Login
 
 ```bash
 curl -X POST http://127.0.0.1:5000/users/login -d username=3 -d password=2
+```
+
+Cannot login if email is not confirmed
+
+## Confirm email
+
+```bash
+curl -X POST http://127.0.0.1:5000/users/signup/confirm -d confirm_code="xxx" -d username=3
 ```
 
 ## Logout

@@ -2,6 +2,23 @@ import psycopg2, os, sql, bcrypt, uuid
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
+def delete_confirmation_code(user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.DELETE_CONFIRMATION_CODE,
+            (
+                user_id,
+            )
+        )
+        conn.commit()
+
+def is_confirmation_code_successful(username, confirmation_code):
+    user = get_user_by_username(username)
+    if user['confirm_code'] == confirmation_code:
+        delete_confirmation_code(user['id'])
+        return user
+    return False
+
 def create_user(data):
     hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
     with conn.cursor() as cur:
@@ -23,9 +40,7 @@ def create_user(data):
         "email": new_user[1],
         "firstname": new_user[2],
         "lastname": new_user[3],
-        "username": new_user[4],
-        "token": new_user[5],
-        "confirm_code": new_user[6],
+        "username": new_user[4]
     }
 
 def get_user_password(username):

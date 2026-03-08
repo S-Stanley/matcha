@@ -20,6 +20,14 @@ def get_user_by_id(user_id):
         print(e)
         return "Error", 500
 
+@blueprint.route("/users/signup/confirm", methods=['POST'])
+def confirm_user_signup():
+    user = handlers.is_confirmation_code_successful(request.form['username'], request.form['confirm_code'])
+    if not user:
+        print("Wrong confirmation conde")
+        return "Error", 400
+    return user, 200
+
 @blueprint.route("/users", methods=['POST'])
 def create_user():
     try:
@@ -52,7 +60,6 @@ def create_user():
             "firstname": new_user["firstname"],
             "lastname": new_user["lastname"],
             "username": new_user["username"],
-            "token": new_user["token"],
         }), 201
     except Exception as e:
         print(e)
@@ -63,7 +70,7 @@ def connect_user():
     try: 
         user = handlers.users.connect_user(request.form);
         if not user:
-            return "User does not exist", 401
+            return "Error", 401
         return jsonify(user)
     except Exception as e:
         print(e)

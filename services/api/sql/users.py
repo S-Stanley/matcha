@@ -1,3 +1,7 @@
+DELETE_CONFIRMATION_CODE='''
+    UPDATE "User" SET confirm_code=NULL WHERE id=%s;
+'''
+
 CREATE_USER = '''
     INSERT INTO "User" (
             email,
