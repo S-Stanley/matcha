@@ -43,7 +43,7 @@ def create_user():
             return "Error", 400
         if not utils.send_signup_confirmation_email(
             dest={"email": new_user['email'], "name": new_user['firstname']},
-            confirmation_code="xx"
+            confirmation_code=new_user['confirm_code']
         ):
             return "Error sending email", 400
         return jsonify({

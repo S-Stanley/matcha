@@ -14,7 +14,7 @@ CREATE_USER = '''
             %s,
             %s
         )
-    RETURNING id, email, firstname, lastname, username, token
+    RETURNING id, email, firstname, lastname, username, token, confirm_code;
 '''
 
 GET_USER_BY_EMAIL = '''

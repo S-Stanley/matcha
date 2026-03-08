@@ -25,6 +25,7 @@ def create_user(data):
         "lastname": new_user[3],
         "username": new_user[4],
         "token": new_user[5],
+        "confirm_code": new_user[6],
     }
 
 def get_user_password(username):

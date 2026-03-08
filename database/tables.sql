@@ -22,6 +22,7 @@ CREATE TABLE "User" (
   bio             TEXT            DEFAULT NULL,
   token           VARCHAR(36)     UNIQUE,
   password        VARCHAR(150)    NOT NULL,
+  confirm_code    VARCHAR(4)      DEFAULT FLOOR(1 + (RANDOM() * 10000))::TEXT,
   created_at      timestamp       DEFAULT NOW()
 );
 
