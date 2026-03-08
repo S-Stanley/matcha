@@ -27,6 +27,7 @@ _UNPROTECTED_ROUTES_ = {
         "/users/login/",
         "/users/signup/confirm",
         "/users/password/change/request",
+        "/users/password/change/confirm",
     ]
 }
 

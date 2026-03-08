@@ -97,3 +97,7 @@ PATCH_USER = '''
     WHERE id=%s
     RETURNING id, email, firstname, lastname, bio, gender, preference, username
 '''
+
+UPDATE_USER_PASSWORD='''
+    UPDATE "User" SET password=%s WHERE id=%s;
+'''

@@ -4,6 +4,14 @@ import psycopg2, os
 
 import handlers, utils
 
+@blueprint.route("/users/password/change/confirm", methods=['POST'])
+def confirm_password_change():
+    if 'username' not in request.form or 'confirm_code' not in request.form:
+        return "Error", 400
+    if not handlers.check_confirm_password_request(request.form['username'], request.form['confirm_code']):
+        return { "updated": False }, 400
+    return { "Updated": True }, 200
+
 @blueprint.route("/users/me", methods=['GET'])
 def get_user_me():
     user = handlers.get_user_by_token(request.headers.get("token"))

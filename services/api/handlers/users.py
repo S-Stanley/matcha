@@ -2,6 +2,55 @@ import psycopg2, os, sql, bcrypt, uuid, utils
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
+def delete_password_request(request_id):
+    with conn.cursor() as cur:
+        cur.execute(
+                sql.new_password_request.DELETE_PASSWORD_REQUEST,
+                (
+                    request_id,
+                )
+        )
+
+def get_password_request(user_id):
+    with conn.cursor() as cur:
+        req = cur.execute(
+            sql.new_password_request.GET_PASSWORD_REQUEST,
+            (
+                user_id,
+            )
+        )
+        req = cur.fetchone()
+        conn.commit()
+        return {
+            "id": req[0],
+            "password": req[1],
+            "confirm_code": req[2],
+        }
+
+def update_user_password(user_id, hashed_password):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.UPDATE_USER_PASSWORD,
+            (
+                hashed_password,
+                user_id,
+            )
+        )
+        conn.commit()
+
+def check_confirm_password_request(username, confirm_code):
+    user = get_user_by_username(username)
+    request = get_password_request(user['id'])
+    if not request:
+        print("request not existing")
+        return False
+    if request['confirm_code'] != confirm_code:
+        print("wrong confirm code")
+        return False
+    update_user_password(user['id'], request['password'])
+    delete_password_request(request['id'])
+    return True
+
 def request_new_password(username, password):
     user = get_user_by_username(username)
     if not user:

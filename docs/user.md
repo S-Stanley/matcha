@@ -58,5 +58,11 @@ curl http://127.0.0.1:5000/users/f8dd18fe-35dc-4fc1-8b69-f7586686fc80 -H token:5
 ## Request new password:
 
 ```bash
-curl http://127.0.0.1:5000/users/password/change/request -H token:5f737066-f767-4235-bbde-8765a7edff18 -d username=3 -d password=new-pass
+curl http://127.0.0.1:5000/users/password/change/request -d username=3 -d password=new-pass
+```
+
+## Confirm password change request
+
+```bash
+curl -X POST http://127.0.0.1:5000/users/password/change/confirm -d username=3 -d confirm_code=xxx
 ```
