@@ -1,6 +1,96 @@
-import psycopg2, os, sql, bcrypt, uuid
+import psycopg2, os, sql, bcrypt, uuid, utils
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+
+def delete_password_request(request_id):
+    with conn.cursor() as cur:
+        cur.execute(
+                sql.new_password_request.DELETE_PASSWORD_REQUEST,
+                (
+                    request_id,
+                )
+        )
+
+def get_password_request(user_id):
+    with conn.cursor() as cur:
+        req = cur.execute(
+            sql.new_password_request.GET_PASSWORD_REQUEST,
+            (
+                user_id,
+            )
+        )
+        req = cur.fetchone()
+        conn.commit()
+        return {
+            "id": req[0],
+            "password": req[1],
+            "confirm_code": req[2],
+        }
+
+def update_user_password(user_id, hashed_password):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.UPDATE_USER_PASSWORD,
+            (
+                hashed_password,
+                user_id,
+            )
+        )
+        conn.commit()
+
+def check_confirm_password_request(username, confirm_code):
+    user = get_user_by_username(username)
+    request = get_password_request(user['id'])
+    if not request:
+        print("request not existing")
+        return False
+    if request['confirm_code'] != confirm_code:
+        print("wrong confirm code")
+        return False
+    update_user_password(user['id'], request['password'])
+    delete_password_request(request['id'])
+    return True
+
+def request_new_password(username, password):
+    user = get_user_by_username(username)
+    if not user:
+        return False
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
+    with conn.cursor() as cur:
+        req = cur.execute(
+            sql.new_password_request.CREATE_PASSWORD_REQUEST,
+            (
+                user['id'],
+                hashed_password,
+            )
+        )
+        req = cur.fetchone()
+        conn.commit()
+        utils.email.send_password_update_request_email(
+            dest={
+                "email": user['email'],
+                "name": user['firstname'],
+            },
+            confirmation_code=req[0]
+        )
+    return True
+
+def delete_confirmation_code(user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.DELETE_CONFIRMATION_CODE,
+            (
+                user_id,
+            )
+        )
+        conn.commit()
+
+def is_confirmation_code_successful(username, confirmation_code):
+    user = get_user_by_username(username)
+    if user['confirm_code'] == confirmation_code:
+        delete_confirmation_code(user['id'])
+        return user
+    return False
 
 def create_user(data):
     hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
@@ -25,6 +115,7 @@ def create_user(data):
         "lastname": new_user[3],
         "username": new_user[4],
         "token": new_user[5],
+        "confirm_code": new_user[6],
     }
 
 def get_user_password(username):
@@ -64,6 +155,7 @@ def get_user_by_username(username):
         "lastname": user[3],
         "username": user[4],
         "token": user[5],
+        "confirm_code": user[6],
     }
 
 def get_user_by_id(user_id):
@@ -109,13 +201,15 @@ def get_user_by_email(email):
 
 def disconnect_user(user_id):
     with conn.cursor() as cur:
-        user = cur.execute(
+        cur.execute(
             sql.users.DISCONNECT_USER,
             (
                 user_id,
             )
         )
+        updated_rows = cur.rowcount
         conn.commit()
+    return updated_rows > 0
 
 def connect_user(data):
     hashed_password = get_user_password(data['username'])
@@ -124,7 +218,11 @@ def connect_user(data):
     if not check_user_password(data['password'], hashed_password):
         print("Wrong password")
         return False
-    return get_user_by_username(data['username'])
+    user = get_user_by_username(data['username'])
+    if user['confirm_code']:
+        print("Email is not confirmed")
+        return False
+    return user
 
 def get_user_by_token(token):
     try:

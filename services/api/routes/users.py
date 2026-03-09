@@ -4,6 +4,14 @@ import psycopg2, os
 
 import handlers, utils
 
+@blueprint.route("/users/password/change/confirm", methods=['POST'])
+def confirm_password_change():
+    if 'username' not in request.form or 'confirm_code' not in request.form:
+        return "Error", 400
+    if not handlers.check_confirm_password_request(request.form['username'], request.form['confirm_code']):
+        return { "updated": False }, 400
+    return { "Updated": True }, 200
+
 @blueprint.route("/users/me", methods=['GET'])
 def get_user_me():
     user = handlers.get_user_by_token(request.headers.get("token"))
@@ -19,6 +27,14 @@ def get_user_by_id(user_id):
     except Exception as e:
         print(e)
         return "Error", 500
+
+@blueprint.route("/users/signup/confirm", methods=['POST'])
+def confirm_user_signup():
+    user = handlers.is_confirmation_code_successful(request.form['username'], request.form['confirm_code'])
+    if not user:
+        print("Wrong confirmation conde")
+        return "Error", 400
+    return user, 200
 
 @blueprint.route("/users", methods=['POST'])
 def create_user():
@@ -38,17 +54,20 @@ def create_user():
             print("Password is too common")
             return "Password is too common", 400
         new_user = handlers.users.create_user(request.form);
-        print(new_user)
         if not new_user:
             print("Error while trying to create user", not new_user)
             return "Error", 400
+        if not utils.send_signup_confirmation_email(
+            dest={"email": new_user['email'], "name": new_user['firstname']},
+            confirmation_code=new_user['confirm_code']
+        ):
+            return "Error sending email", 400
         return jsonify({
             "id": new_user["id"],
             "email": new_user["email"],
             "firstname": new_user["firstname"],
             "lastname": new_user["lastname"],
             "username": new_user["username"],
-            "token": new_user["token"],
         }), 201
     except Exception as e:
         print(e)
@@ -59,7 +78,7 @@ def connect_user():
     try: 
         user = handlers.users.connect_user(request.form);
         if not user:
-            return "User does not exist", 401
+            return "Error", 401
         return jsonify(user)
     except Exception as e:
         print(e)
@@ -68,10 +87,13 @@ def connect_user():
 @blueprint.route("/users/logout", methods=['POST'])
 def disconnect_user():
     try: 
-        user = handlers.users.disconnect_user(request.form['id']);
+        actual_user = handlers.get_user_by_token(request.headers.get("token"))
+        if not actual_user:
+            return "Error", 401
+        user = handlers.users.disconnect_user(actual_user['id'])
         if not user:
             return "User does not exist", 401
-        return True, 200
+        return { "disconnected": True }, 200
     except Exception as e:
         print(e)
         return "Error", 500
@@ -87,6 +109,16 @@ PREFERENCE = [
   'FEMALE',
   'BOTH'
 ]
+
+@blueprint.route("/users/password/change/request", methods=['POST'])
+def request_new_password():
+    is_request_successful = handlers.request_new_password(
+        username=request.form['username'],
+        password=request.form['password'],
+    )
+    if not is_request_successful:
+        return { "requested": False }, 400
+    return { "requested": True }, 200
 
 @blueprint.route("/users", methods=['PATCH'])
 def patch_user():

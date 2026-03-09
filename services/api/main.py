@@ -20,7 +20,15 @@ app.register_blueprint(blueprint)
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
 _UNPROTECTED_ROUTES_ = {
-    "POST": ["/users", "/users/", "/users/login", "/users/login/"]
+    "POST": [
+        "/users",
+        "/users/",
+        "/users/login",
+        "/users/login/",
+        "/users/signup/confirm",
+        "/users/password/change/request",
+        "/users/password/change/confirm",
+    ]
 }
 
 def isProtectedRoute(method, path):

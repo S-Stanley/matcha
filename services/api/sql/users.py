@@ -1,3 +1,7 @@
+DELETE_CONFIRMATION_CODE='''
+    UPDATE "User" SET confirm_code=NULL WHERE id=%s;
+'''
+
 CREATE_USER = '''
     INSERT INTO "User" (
             email,
@@ -14,7 +18,7 @@ CREATE_USER = '''
             %s,
             %s
         )
-    RETURNING id, email, firstname, lastname, username, token
+    RETURNING id, email, firstname, lastname, username, token, confirm_code;
 '''
 
 GET_USER_BY_EMAIL = '''
@@ -61,7 +65,8 @@ GET_USER_BY_USERNAME = '''
         firstname,
         lastname,
         username,
-        token
+        token,
+        confirm_code
     FROM "User"
     WHERE username=%s
 '''
@@ -75,7 +80,7 @@ GET_USER_PASSWORD = '''
 
 DISCONNECT_USER = '''
     UPDATE "User"
-    SET token=NULL
+    SET token=gen_random_uuid()
     WHERE id=%s
 '''
 
@@ -91,4 +96,8 @@ PATCH_USER = '''
         username=%s
     WHERE id=%s
     RETURNING id, email, firstname, lastname, bio, gender, preference, username
+'''
+
+UPDATE_USER_PASSWORD='''
+    UPDATE "User" SET password=%s WHERE id=%s;
 '''

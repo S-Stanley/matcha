@@ -80,6 +80,13 @@
   .login-input:focus {
     border-color: #007bff;
   }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
   
   /* Bouton */
   .login-button {

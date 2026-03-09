@@ -1,7 +1,7 @@
 import "../CSS/Register.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
-import { createUser } from "../api";
+import { confirmSignup, createUser } from "../api";
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -62,6 +62,10 @@ function Register() {
   });
 
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [requiresConfirmation, setRequiresConfirmation] = useState(false);
+  const [confirmCode, setConfirmCode] = useState("");
+  const [pendingUsername, setPendingUsername] = useState("");
   const [touched, setTouched] = useState({
     firstname: false,
     lastname: false,
@@ -98,7 +102,8 @@ function Register() {
     return !loading && allFilled && emailOk && pwOk && !validate(form);
   }, [loading, allFilled, emailOk, pwOk, form]);
 
-  const handleRegister = async () => {
+  const handleRegister = async (e) => {
+    e.preventDefault();
     if (loading) return;
 
     const validationError = validate(form);
@@ -108,13 +113,53 @@ function Register() {
     }
 
     setError(null);
+    setSuccessMessage("");
     setLoading(true);
 
     try {
-      await createUser(form);
-      navigate("/CompleteProfile");
+      const createdUser = await createUser(form);
+      setPendingUsername(createdUser?.username || form.username.trim());
+      setRequiresConfirmation(true);
+      setSuccessMessage("Compte créé. Vérifie ton email puis saisis le code de confirmation.");
     } catch (err) {
-      setError(err.message || "Erreur lors de l'inscription");
+      if (err?.message === "Error") {
+        setError("Erreur serveur pendant l'inscription.");
+      } else {
+        setError(err.message || "Erreur lors de l'inscription");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirm = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    if (!confirmCode.trim()) {
+      setError("Le code de confirmation est obligatoire.");
+      return;
+    }
+
+    setError(null);
+    setSuccessMessage("");
+    setLoading(true);
+
+    try {
+      await confirmSignup({
+        username: pendingUsername || form.username,
+        confirmCode,
+      });
+      navigate("/", {
+        state: {
+          message: "Email confirmé. Tu peux maintenant te connecter.",
+        },
+      });
+    } catch (err) {
+      if (err?.message === "Error") {
+        setError("Code de confirmation invalide.");
+      } else {
+        setError(err.message || "Code de confirmation invalide.");
+      }
     } finally {
       setLoading(false);
     }
@@ -155,67 +200,92 @@ function Register() {
           </p>
         </div>
 
+        {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
 
-        <input
-          className="login-input"
-          name="lastname"
-          type="text"
-          placeholder="Nom"
-          value={form.lastname}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
-        <input
-          className="login-input"
-          name="firstname"
-          type="text"
-          placeholder="Prénom"
-          value={form.firstname}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
-        <input
-          className="login-input"
-          name="username"
-          type="text"
-          placeholder="Pseudo"
-          value={form.username}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
+        {!requiresConfirmation ? (
+          <form className="register-form" onSubmit={handleRegister}>
+            <input
+              className="login-input"
+              name="lastname"
+              type="text"
+              placeholder="Nom"
+              value={form.lastname}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <input
+              className="login-input"
+              name="firstname"
+              type="text"
+              placeholder="Prénom"
+              value={form.firstname}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <input
+              className="login-input"
+              name="username"
+              type="text"
+              placeholder="Pseudo"
+              value={form.username}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
 
-        <input
-          className="login-input"
-          name="email"
-          type="text"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
-        {touched.email && form.email.trim() !== "" && !emailOk && (
-          <p style={{ color: "red", marginTop: 6 }}>Email invalide.</p>
+            <input
+              className="login-input"
+              name="email"
+              type="text"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            {touched.email && form.email.trim() !== "" && !emailOk && (
+              <p style={{ color: "red", marginTop: 6 }}>Email invalide.</p>
+            )}
+
+            <input
+              className="login-input"
+              name="password"
+              type="password"
+              placeholder="Mot de passe"
+              value={form.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            {touched.password && form.password.trim() !== "" && !pwOk && (
+              <p style={{ color: "red", marginTop: 6 }}>
+                Mot de passe trop faible : {pwIssues.join(", ")}.
+              </p>
+            )}
+
+            <button className="login-button" type="submit" disabled={!canSubmit}>
+              {loading ? "Création..." : "Créer mon compte"}
+            </button>
+          </form>
+        ) : (
+          <form className="register-form" onSubmit={handleConfirm}>
+            <input
+              className="login-input"
+              type="text"
+              value={pendingUsername}
+              disabled
+            />
+            <input
+              className="login-input"
+              name="confirm_code"
+              type="text"
+              placeholder="Code de confirmation reçu par email"
+              value={confirmCode}
+              onChange={(e) => setConfirmCode(e.target.value)}
+            />
+            <button className="login-button" type="submit" disabled={loading}>
+              {loading ? "Confirmation..." : "Confirmer mon email"}
+            </button>
+          </form>
         )}
-
-        <input
-          className="login-input"
-          name="password"
-          type="password"
-          placeholder="Mot de passe"
-          value={form.password}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
-        {touched.password && form.password.trim() !== "" && !pwOk && (
-          <p style={{ color: "red", marginTop: 6 }}>
-            Mot de passe trop faible : {pwIssues.join(", ")}.
-          </p>
-        )}
-
-        <button className="login-button" onClick={handleRegister} disabled={!canSubmit}>
-          {loading ? "Création..." : "Créer mon compte"}
-        </button>
       </div>
     </div>
   );

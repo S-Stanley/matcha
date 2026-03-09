@@ -1,36 +1,33 @@
 import "../CSS/Login.css";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { loginUser } from "../api";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  useEffect(() => {
+    if (location.state?.message) {
+      setMessage(location.state.message);
+    }
+  }, [location.state]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
     setError("");
+    setMessage("");
     setLoading(true);
 
     try {
-      const body = new URLSearchParams();
-      body.append("username", username);
-      body.append("password", password);
-
-      const res = await fetch("http://127.0.0.1:5000/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString(),
-      });
-
-      if (!res.ok) {
-        throw new Error("Identifiants invalides.");
-      }
-
-      const data = await res.json();
+      const data = await loginUser({ username, password });
       if (!data?.id || !data?.token) {
         throw new Error("Réponse login inattendue.");
       }
@@ -39,8 +36,14 @@ function Login() {
       localStorage.setItem("token", data.token);
 
       navigate("/match");
-    } catch (e) {
-      setError(e?.message || "Erreur lors de la connexion.");
+    } catch (err) {
+      if (err?.status === 401) {
+        setError("Identifiants invalides ou compte non confirmé.");
+      } else if (err?.message === "Error") {
+        setError("Erreur serveur pendant la connexion.");
+      } else {
+        setError(err?.message || "Erreur lors de la connexion.");
+      }
     } finally {
       setLoading(false);
     }
@@ -71,36 +74,39 @@ function Login() {
           </p>
         </div>
 
-        <input
-          className="login-input"
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+        <form className="login-form" onSubmit={handleLogin}>
+          <input
+            className="login-input"
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-        <input
-          className="login-input"
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <input
+            className="login-input"
+            type="password"
+            placeholder="Mot de passe"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        {error && <p style={{ color: "red", marginTop: 8 }}>{error}</p>}
+          {message && <p style={{ color: "green", marginTop: 8 }}>{message}</p>}
+          {error && <p style={{ color: "red", marginTop: 8 }}>{error}</p>}
 
-        <p className="forgotpassword-button" style={{ cursor: "pointer" }}>
-          Mot de passe oublié ?
-        </p>
+          <p className="forgotpassword-button" style={{ cursor: "pointer" }}>
+            Mot de passe oublié ?
+          </p>
 
-        <button
-          className="login-button"
-          onClick={handleLogin}
-          style={{ cursor: loading ? "not-allowed" : "pointer" }}
-          disabled={loading}
-        >
-          {loading ? "Connexion..." : "Se connecter"}
-        </button>
+          <button
+            type="submit"
+            className="login-button"
+            style={{ cursor: loading ? "not-allowed" : "pointer" }}
+            disabled={loading}
+          >
+            {loading ? "Connexion..." : "Se connecter"}
+          </button>
+        </form>
       </div>
     </div>
   );
