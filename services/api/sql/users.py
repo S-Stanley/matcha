@@ -1,3 +1,7 @@
+GET_ALL_USERS = '''
+    SELECT id, username, firstname, lastname FROM "User";
+'''
+
 DELETE_CONFIRMATION_CODE='''
     UPDATE "User" SET confirm_code=NULL WHERE id=%s;
 '''

@@ -2,6 +2,24 @@ import psycopg2, os, sql, bcrypt, uuid, utils
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
+def get_all_users():
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.GET_ALL_USERS,
+        )
+        req = cur.fetchall()
+        conn.commit()
+        output = []
+        for user in req:
+            output.append({
+                "id": user[0],
+                "username": user[1],
+                "firstname": user[2],
+                "lastname": user[3],
+            })
+        return output
+    
+
 def delete_password_request(request_id):
     with conn.cursor() as cur:
         cur.execute(

@@ -66,3 +66,9 @@ curl http://127.0.0.1:5000/users/password/change/request -d username=3 -d passwo
 ```bash
 curl -X POST http://127.0.0.1:5000/users/password/change/confirm -d username=3 -d confirm_code=xxx
 ```
+
+## Get user list/search
+
+```bash
+curl http://127.0.0.1:5000/users -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
