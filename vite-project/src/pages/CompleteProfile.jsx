@@ -1,10 +1,40 @@
 import "../CSS/CompleteProfile.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser, patchCurrentUser } from "../api";
+
+const GENDER_TO_API = {
+  Homme: "MALE",
+  Femme: "FEMALE",
+  Autre: "OTHERS",
+};
+
+const API_TO_GENDER = {
+  MALE: "Homme",
+  FEMALE: "Femme",
+  OTHERS: "Autre",
+  "DO NOT PRONONCE": "Autre",
+};
+
+const PREFERENCE_TO_API = {
+  Homme: "MALE",
+  Femme: "FEMALE",
+  "Les deux": "BOTH",
+};
+
+const API_TO_PREFERENCE = {
+  MALE: "Homme",
+  FEMALE: "Femme",
+  BOTH: "Les deux",
+};
 
 function CompleteProfile() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [userBase, setUserBase] = useState(null);
 
   const [answers, setAnswers] = useState({
     gender: "",
@@ -26,13 +56,47 @@ function CompleteProfile() {
 
   const current = steps[step];
 
+  useEffect(() => {
+    const bootstrap = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      try {
+        const me = await getCurrentUser(token);
+        setUserBase({
+          email: me.email || "",
+          firstname: me.firstname || "",
+          lastname: me.lastname || "",
+          username: me.username || "",
+        });
+        setAnswers((prev) => ({
+          ...prev,
+          bio: me.bio || "",
+          gender: API_TO_GENDER[me.gender] || "",
+          preference: API_TO_PREFERENCE[me.preference] || "",
+        }));
+      } catch (err) {
+        setError("Impossible de charger ton profil. Reconnecte-toi.");
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    bootstrap();
+  }, [navigate]);
+
   // --- SELECT SIMPLE ---
   const handleSelect = (value) => {
+    if (error) setError("");
     setAnswers({ ...answers, [current.key]: value });
   };
 
   // --- SELECT MULTIPLE ---
   const handleMultiSelect = (value) => {
+    if (error) setError("");
     const arr = answers[current.key];
     const updated = arr.includes(value)
       ? arr.filter((v) => v !== value)
@@ -42,6 +106,7 @@ function CompleteProfile() {
 
   // --- TEXTAREA ---
   const handleChange = (e) => {
+    if (error) setError("");
     setAnswers({ ...answers, [current.key]: e.target.value });
   };
 
@@ -73,11 +138,42 @@ function CompleteProfile() {
   };
 
   // --- CONFIRMATION FINALE ---
-  const confirmProfile = () => {
-    console.log("Profil final :", answers);
-    navigate("/match", { replace: true });
+  const confirmProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || !userBase) {
+      setError("Session invalide. Reconnecte-toi.");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    try {
+      await patchCurrentUser(token, {
+        email: userBase.email,
+        firstname: userBase.firstname,
+        lastname: userBase.lastname,
+        username: userBase.username,
+        bio: answers.bio,
+        gender: GENDER_TO_API[answers.gender],
+        preference: PREFERENCE_TO_API[answers.preference],
+      });
+      navigate("/match", { replace: true });
+    } catch (err) {
+      setError(err?.message || "Erreur lors de la mise à jour du profil.");
+    } finally {
+      setSaving(false);
+    }
   };
-  
+
+  if (loadingUser) {
+    return (
+      <div className="completeprofile-container">
+        <div className="completeprofile-page">
+          <h1 className="completeprofile-title">Chargement du profil...</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="completeprofile-container">
@@ -85,12 +181,13 @@ function CompleteProfile() {
 
         {/* TITLE */}
         <h1 className="completeprofile-title">{current.question}</h1>
+        {error && <p style={{ color: "red", marginBottom: 12 }}>{error}</p>}
 
         {/* --- RÉSUMÉ FINAL --- */}
         {current.type === "summary" && (
           <div className="summary-box">
 
-            <div class="summary-info1">
+            <div className="summary-info1">
               <div className="summary-item">
                 <h3>Genre</h3>
                 <p>{answers.gender}</p>
@@ -126,8 +223,8 @@ function CompleteProfile() {
               </div>
             </div>
 
-            <button className="confirm-button" onClick={confirmProfile}>
-              CONFIRMER
+            <button className="confirm-button" onClick={confirmProfile} disabled={saving}>
+              {saving ? "Envoi..." : "CONFIRMER"}
             </button>
           </div>
         )}
@@ -182,7 +279,7 @@ function CompleteProfile() {
             <div className="photo-preview-grid">
               {answers.photos.map((src, i) => (
                 <div key={i} className="photo-preview">
-                  <img src={src} />
+                  <img src={src} alt="" />
                   <button className="remove-photo" onClick={() => removePhoto(i)}>✕</button>
                 </div>
               ))}

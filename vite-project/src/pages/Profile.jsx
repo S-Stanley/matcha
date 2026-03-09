@@ -1,25 +1,28 @@
 import "../CSS/Profile.css";
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { getCurrentUser } from "../api";
+
+const API_TO_GENDER = {
+  MALE: "Homme",
+  FEMALE: "Femme",
+  OTHERS: "Autre",
+  "DO NOT PRONONCE": "Ne se prononce pas",
+};
+
+const API_TO_PREFERENCE = {
+  MALE: "Hommes",
+  FEMALE: "Femmes",
+  BOTH: "Les deux",
+};
 
 function Profile() {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    navigate("/");
-  };
-
-  /* =======================
-     STATE PROFIL UTILISATEUR
-     ======================= */
-
   const [profile, setProfile] = useState({
-    firstName: "Nathan",
-    lastName: "Bechon",
-    email: "nbechon@email.com",
-    gender: "Homme",
-    sexualPreference: "Femmes",
-    bio: "blablabla",
+    firstName: "",
+    lastName: "",
+    email: "",
+    gender: "",
+    sexualPreference: "",
+    bio: "",
     tags: ["sport", "cinema"],
     popularity: 42,
     location: {
@@ -32,25 +35,49 @@ function Profile() {
       { id: 3, url: null, isProfile: false },
     ],
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [isEditing, setIsEditing] = useState(false);
 
-  /* =======================
-     VUES & LIKES (DEMO)
-     ======================= */
-
-  const [views, setViews] = useState([
+  const views = [
     { username: "User42", date: "2026-01-20" },
     { username: "Emma", date: "2026-01-22" },
-  ]);
+  ];
 
-  const [likes, setLikes] = useState([
+  const likes = [
     { username: "Lucas", date: "2026-01-21" },
-  ]);
+  ];
 
-  /* =======================
-     LOCALISATION GPS
-     ======================= */
+  useEffect(() => {
+    const loadProfile = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Non connecté.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const me = await getCurrentUser(token);
+        setProfile((prev) => ({
+          ...prev,
+          firstName: me.firstname || "",
+          lastName: me.lastname || "",
+          email: me.email || "",
+          gender: API_TO_GENDER[me.gender] || "Non renseigné",
+          sexualPreference: API_TO_PREFERENCE[me.preference] || "Non renseigné",
+          bio: me.bio || "",
+        }));
+      } catch (err) {
+        setError(err?.message || "Impossible de charger le profil.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   const requestGPSLocation = () => {
     if (!navigator.geolocation) {
@@ -78,8 +105,10 @@ function Profile() {
 
   return (
     <div className="myprofile-container">
-
       <div className="myprofile-content">
+        {loading && <p>Chargement du profil...</p>}
+        {!loading && error && <p style={{ color: "red" }}>{error}</p>}
+        {!loading && !error && (
         <div className="myprofile">
 
           <div className="photo-container">
@@ -164,6 +193,7 @@ function Profile() {
           </div>
 
         </div>
+        )}
       </div>
     </div>
   );

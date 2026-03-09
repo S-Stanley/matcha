@@ -1,7 +1,7 @@
 import "../CSS/Register.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
-import { confirmSignup, createUser } from "../api";
+import { confirmSignup, createUser, getCurrentUser } from "../api";
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -84,6 +84,10 @@ function Register() {
 
   const [loading, setLoading] = useState(false);
 
+  const isProfileComplete = (user) => {
+    return Boolean(user?.bio && user.bio.trim()) && Boolean(user?.gender) && Boolean(user?.preference);
+  };
+
   const emailOk = useMemo(() => isValidEmail(form.email), [form.email]);
   const pwIssues = useMemo(() => passwordIssues(form.password), [form.password]);
   const pwOk = pwIssues.length === 0;
@@ -145,15 +149,26 @@ function Register() {
     setLoading(true);
 
     try {
-      await confirmSignup({
+      const confirmedUser = await confirmSignup({
         username: pendingUsername || form.username,
         confirmCode,
       });
-      navigate("/", {
-        state: {
-          message: "Email confirmé. Tu peux maintenant te connecter.",
-        },
-      });
+      if (confirmedUser?.id && confirmedUser?.token) {
+        localStorage.setItem("userId", confirmedUser.id);
+        localStorage.setItem("token", confirmedUser.token);
+        try {
+          const me = await getCurrentUser(confirmedUser.token);
+          navigate(isProfileComplete(me) ? "/match" : "/completeprofile", { replace: true });
+        } catch (_) {
+          navigate("/completeprofile", { replace: true });
+        }
+      } else {
+        navigate("/", {
+          state: {
+            message: "Email confirmé. Tu peux maintenant te connecter.",
+          },
+        });
+      }
     } catch (err) {
       if (err?.message === "Error") {
         setError("Code de confirmation invalide.");

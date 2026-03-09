@@ -32,6 +32,22 @@ async function postForm(path, payload) {
   return data;
 }
 
+async function parseResponse(response) {
+  const text = await response.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch (_) {
+    data = null;
+  }
+
+  if (!response.ok) {
+    throw new ApiError(text || "Erreur serveur", response.status);
+  }
+
+  return data;
+}
+
 export async function createUser(form) {
   const payload = {
     email: form.email?.trim() || "",
@@ -60,4 +76,44 @@ export async function loginUser({ username, password }) {
   };
 
   return postForm("/users/login", payload);
+}
+
+export async function getCurrentUser(token) {
+  const response = await fetch(`${API_URL}/users/me`, {
+    method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function patchCurrentUser(token, payload) {
+  const response = await fetch(`${API_URL}/users`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      token,
+    },
+    body: new URLSearchParams(payload).toString(),
+  });
+  return parseResponse(response);
+}
+
+export async function requestPasswordChange({ username, password }) {
+  const payload = {
+    username: username?.trim() || "",
+    password: password || "",
+  };
+
+  return postForm("/users/password/change/request", payload);
+}
+
+export async function confirmPasswordChange({ username, confirmCode }) {
+  const payload = {
+    username: username?.trim() || "",
+    confirm_code: confirmCode?.trim() || "",
+  };
+
+  return postForm("/users/password/change/confirm", payload);
 }
