@@ -2,6 +2,27 @@ import psycopg2, os, sql, bcrypt, uuid
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
+def get_all_matches_by_user_id(user_id): 
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.matches.GET_ALL_MATCH_BY_USER_ID,
+            (
+                user_id,
+                user_id,
+            )
+        )
+        req = cur.fetchall()
+        conn.commit()
+        output = []
+        for user in req:
+            output.append({
+                "id": user[0],
+                "username": user[1],
+                "firstname": user[2],
+                "lastname": user[3],
+            })
+        return output
+
 def delete_match():
     return True
 

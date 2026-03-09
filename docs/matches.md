@@ -1,5 +1,10 @@
 # Matches
 
+## Get list of matches
+
+```bash
+curl http://127.0.0.1:5000/matches -H token:5fb9b8f1-8b36-445e-a6c0-a71b1a1efaa2
+```
 
 ## Send message in a match conversation
 

@@ -45,3 +45,22 @@ DELETE_MATCH = '''
 DELETE_MATCH_MEMBER = '''
     DELETE FROM "MatchMember" WHERE match_id=%s
 '''
+
+GET_ALL_MATCH_BY_USER_ID = '''
+    WITH all_user_match AS (
+        SELECT "Match".id, "Match".created_at
+        FROM "Match"
+        LEFT JOIN "MatchMember" ON "Match".id = "MatchMember".match_id
+        WHERE "MatchMember".user_id = %s
+    )
+    SELECT
+        "User".id,
+        "User".username,
+        "User".firstname,
+        "User".username
+    FROM
+        all_user_match
+    LEFT JOIN "MatchMember" ON "MatchMember".match_id = all_user_match.id
+    LEFT JOIN "User" ON "MatchMember".user_id = "User".id
+    WHERE "MatchMember".user_id != %s
+''';

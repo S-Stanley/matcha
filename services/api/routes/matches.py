@@ -4,6 +4,13 @@ import psycopg2, os
 
 import handlers, utils
 
+@blueprint.route("/matches", methods=['GET'])
+def get_match_list():
+    user = handlers.get_user_by_token(request.headers.get("token"))
+    if not user:
+        return "Error", 400
+    return handlers.get_all_matches_by_user_id(user['id']), 200
+
 @blueprint.route("/matches/<match_id>/message", methods=['POST'])
 def create_new_message(match_id):
     user = handlers.get_user_by_token(request.headers.get("token"))
