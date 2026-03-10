@@ -66,3 +66,25 @@ CREATE TABLE "Messages" (
   content         TEXT            NOT NULL,
   created_at      timestamp       DEFAULT NOW()
 );
+
+CREATE TYPE NOTIFICATIONS_STATUS as ENUM (
+  'READ',
+  'UNREAD'
+);
+
+CREATE TYPE NOTIFICATION_TYPE as ENUM (
+  'NEW_LIKE',
+  'NEW_VIEW',
+  'NEW_MSG',
+  'NEW_MATCH',
+  'NEW_UNLIKE'
+);
+
+CREATE TABLE "Notifications" (
+  id              UUID                  NOT NULL DEFAULT gen_random_uuid(),
+  user_id         UUID                  NOT NULL references "User"(id),
+  status          NOTIFICATIONS_STATUS  NOT NULL,
+  type            NOTIFICATION_TYPE     NOT NULL,
+  from_user_id    UUID                  NOT NULL references "User"(id),
+  created_at      timestamp             DEFAULT NOW()
+);
