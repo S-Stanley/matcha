@@ -29,3 +29,9 @@ curl -X GET http://127.0.0.1:5000/likes -H token:5fb9b8f1-8b36-445e-a6c0-a71b1a1
 ```
 
 We will use the token to know which user request this like list
+
+## Delete like
+
+```bash
+curl -X DELETE http://127.0.0.1:5000/likes/8d622fc8-a8cf-46d8-b705-aa095aa68dc6 -H token:5f737066-f767-4235-bbde-8765a7edff18
+```

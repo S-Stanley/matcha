@@ -2,9 +2,19 @@ import psycopg2, os, sql, bcrypt, uuid
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
+def delete_like(liked_user_id, connected_user_id):
+    print(liked_user_id, connected_user_id)
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.like.DELETE_LIKE,
+            (
+                liked_user_id,
+                connected_user_id,
+            )
+        )
+        conn.commit()
 
 def is_user_liked(liked_user_id, connected_user_id):
-    print(liked_user_id, connected_user_id)
     with conn.cursor() as cur:
         cur.execute(
             sql.like.CHECK_IS_USER_LIKED,

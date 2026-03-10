@@ -23,8 +23,31 @@ def get_all_matches_by_user_id(user_id):
             })
         return output
 
-def delete_match():
+def delete_match(match_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.matches.DELETE_MATCH,
+            (
+                match_id,
+            )
+        )
+        conn.commit()
     return True
+
+def delete_match_member(match_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.matches.DELETE_MATCH_MEMBER,
+            (
+                match_id,
+            )
+        )
+        conn.commit()
+    return True
+
+def delete_match_from_unlike(match_id):
+    delete_match_member(match_id)
+    delete_match(match_id)
 
 def create_match_member(data):
     with conn.cursor() as cur:
