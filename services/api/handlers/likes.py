@@ -2,6 +2,21 @@ import psycopg2, os, sql, bcrypt, uuid
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
+
+def is_user_liked(liked_user_id, connected_user_id):
+    print(liked_user_id, connected_user_id)
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.like.CHECK_IS_USER_LIKED,
+            (
+                liked_user_id,
+                connected_user_id,
+            )
+        )
+        req = cur.fetchone()
+        conn.commit()
+        return False if req is None else True
+
 def should_create_match(data):
     with conn.cursor() as cur:
         cur.execute(
