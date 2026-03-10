@@ -3,6 +3,17 @@ from flask import jsonify, request
 
 import handlers, utils
 
+@blueprint.route("/likes/<liked_user_id>", methods=['DELETE'])
+def delete_like_endpoint(liked_user_id):
+    connected_user = handlers.get_user_by_token(request.headers.get("token"))
+    if not connected_user:
+        return "Error", 400
+    has_existing_match = handlers.check_if_match_exist([liked_user_id, connected_user['id']])
+    handlers.delete_like(liked_user_id, connected_user['id'])
+    if has_existing_match:
+        handlers.delete_match_from_unlike(has_existing_match['id']);
+    return { "deleted": True }, 200
+
 @blueprint.route("/likes", methods=['POST'])
 def create_like():
     user = handlers.get_user_by_token(request.headers.get("token"))

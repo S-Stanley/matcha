@@ -51,7 +51,7 @@ curl http://127.0.0.1:5000/users/me -H token:5f737066-f767-4235-bbde-8765a7edff1
 ## Get user by id
  
 ```
-curl http://127.0.0.1:5000/users/f8dd18fe-35dc-4fc1-8b69-f7586686fc80 -H token:5f737066-f767-4235-bbde-8765a7edff18
+curl http://127.0.0.1:5000/users/8d622fc8-a8cf-46d8-b705-aa095aa68dc6 -H token:5f737066-f767-4235-bbde-8765a7edff18
 ```
 
 
