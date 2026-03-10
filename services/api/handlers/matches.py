@@ -25,6 +25,18 @@ def get_all_matches_by_user_id(user_id):
             })
         return output
 
+def delete_match_message(match_id): 
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.matches.DELETE_ALL_CHAT_MESSAGE,
+            (
+                match_id,
+            )
+        )
+        conn.commit()
+    return True
+
+
 def delete_match(match_id):
     with conn.cursor() as cur:
         cur.execute(
@@ -49,6 +61,7 @@ def delete_match_member(match_id):
 
 def delete_match_from_unlike(match_id):
     delete_match_member(match_id)
+    delete_match_message(match_id)
     delete_match(match_id)
 
 def create_match_member(data):
@@ -80,6 +93,19 @@ def create_match():
         "id": req[0],
         "created_at": req[1],
     }
+
+def get_other_member_of_match(match_id, connected_user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.matches.GET_OTHER_MEMBER_OF_MATCH,
+            (
+                match_id,
+                connected_user_id,
+            )
+        )
+        req = cur.fetchone()
+        conn.commit()
+    return req[0]
 
 def check_if_match_exist(userIds):
     with conn.cursor() as cur:

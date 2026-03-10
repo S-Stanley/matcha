@@ -2,6 +2,35 @@ import psycopg2, os, sql, bcrypt, uuid, utils
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
+def set_all_user_notifications_as_read(user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.notifications.UPDATE_USER_SET_ALL_NOTIFICATIONS_AS_READ_BY_USER_ID,
+            (
+                user_id,
+            )
+    )
+
+def get_all_notifications_by_user_id(user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.notifications.GET_ALL_NOTIFICATIONS_BY_USER_ID,
+            (
+                user_id,
+            )
+        )
+        req = cur.fetchall()
+        conn.commit()
+        output = []
+        for user in req:
+            output.append({
+                "id": user[0],
+                "type": user[1],
+                "from_user_id": user[2],
+                "created_at": user[3],
+            })
+        return output
+
 def get_all_users():
     with conn.cursor() as cur:
         cur.execute(

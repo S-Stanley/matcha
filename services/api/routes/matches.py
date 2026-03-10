@@ -26,6 +26,12 @@ def create_new_message(match_id):
     })
     if not new_message:
         return "Error", 400
+    other_member_of_match = handlers.get_other_member_of_match(match_id, user['id'])
+    handlers.create_notification({
+        "user_id": other_member_of_match,
+        "type": "NEW_MSG",
+        "from_user_id": user['id'],
+    })
     return new_message, 201
 
 @blueprint.route("/matches/<match_id>/message", methods=['GET'])

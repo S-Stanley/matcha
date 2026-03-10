@@ -72,3 +72,17 @@ curl -X POST http://127.0.0.1:5000/users/password/change/confirm -d username=3 -
 ```bash
 curl http://127.0.0.1:5000/users -H token:5f737066-f767-4235-bbde-8765a7edff18
 ```
+
+## Get all users notifications
+
+```bash
+curl http://127.0.0.1:5000/users/me/notifications -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
+
+* Only return unread notifications
+
+## Set all users notifications as readed
+
+```bash
+curl -X PATCH http://127.0.0.1:5000/users/me/notifications -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
