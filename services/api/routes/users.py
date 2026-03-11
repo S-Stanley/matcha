@@ -17,7 +17,7 @@ def confirm_password_change():
         return "Error", 400
     if not handlers.check_confirm_password_request(request.form['username'], request.form['confirm_code']):
         return { "updated": False }, 400
-    return { "Updated": True }, 200
+    return { "updated": True }, 200
 
 @blueprint.route("/users/me", methods=['GET'])
 def get_user_me():
@@ -29,8 +29,18 @@ def get_user_me():
 @blueprint.route("/users/<user_id>", methods=['GET'])
 def get_user_by_id(user_id):
     try:
+        connected_user = handlers.get_user_by_token(request.headers.get("token"))
+        if not connected_user:
+            return "Error", 400
         user = handlers.get_user_by_id(user_id)
-        return user, 200
+        is_already_liked = handlers.is_user_liked(liked_user_id=user_id, connected_user_id=connected_user['id'])
+        return {
+            "id": user['id'],
+            "firstname": user['firstname'],
+            "lastname": user['lastname'],
+            "username": user['username'],
+            "isLiked": is_already_liked,
+        }, 200
     except Exception as e:
         print(e)
         return "Error", 500
