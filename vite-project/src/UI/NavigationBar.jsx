@@ -41,6 +41,7 @@ export default function NavigationBar() {
 
   return (
     <div className="top-bar">
+      <div className="top-side-spacer" aria-hidden="true" />
       <div className="top-center">
         <NavLink
           to="/match"
@@ -75,9 +76,11 @@ export default function NavigationBar() {
         className="logout-button"
         onClick={handleLogout}
         disabled={loading}
+        aria-label="Se déconnecter"
+        title="Se déconnecter"
         style={{ cursor: loading ? "not-allowed" : "pointer" }}
       >
-        {loading ? "Déconnexion..." : "Se déconnecter"}
+        {loading ? "…" : "🚪"}
       </button>
     </div>
   );

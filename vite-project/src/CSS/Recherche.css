@@ -1,6 +1,6 @@
 .recherche-container {
     height: 100%;
-    background: white;
+    background: transparent;
     font-family: "Segoe UI", Roboto, sans-serif;
     color: #000;
 }
@@ -11,7 +11,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(170, 24, 58, 0.107);
+    background: var(--page-bg);
+    box-sizing: border-box;
 }
 
 .recherche {

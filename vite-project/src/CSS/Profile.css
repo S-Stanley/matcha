@@ -1,45 +1,47 @@
 .myprofile-container {
-    width: 100%;
-    color: #000000;
-    background: white;
-    font-family: "Segoe UI", Roboto, sans-serif;
-  }
+  width: 100%;
+  height: 100%;
+  color: #000000;
+  background: transparent;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
   
 .myprofile-content {
-    height: 100%;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    background: rgba(170, 24, 58, 0.107);
+  height: 100%;
+  min-height: 0;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  background: var(--page-bg);
+  box-sizing: border-box;
 }
   
 .myprofile {
-    display: flex;
-    width: 80%;
-    height: 80%;
-    border-radius: 20px;
-    background: white;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    padding: 32px 48px;
-    gap: 40px;
+  display: flex;
+  width: min(1200px, 100%);
+  height: 100%;
+  min-height: 0;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 24px 28px;
+  gap: 24px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
   
 .photo-container {
-    flex: 0 0 420px;
+  flex: 0 0 340px;
+  min-height: 0;
 }
   
 .myprofile-card-picture {
-    height: 100%;
-    border-radius: 18px;
-    border-radius: 20px;
-    background: white;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    overflow: hidden;
+  height: 100%;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
   
 .myprofile-card-picture img {
@@ -49,9 +51,10 @@
 }
   
 .myprofile-card-description {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 24px;
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding-right: 12px;
 }
   
 .myprofile-card-description h2 {
@@ -94,10 +97,12 @@
 }
   
 .myprofile-stats {
-    flex: 0 0 280px;
-    padding-left: 32px;
-    border-left: 1px solid #2a2a3c;
-    margin-top: 0;
+  flex: 0 0 260px;
+  min-width: 0;
+  padding-left: 20px;
+  border-left: 1px solid #e8e8e8;
+  margin-top: 0;
+  overflow-y: auto;
 }
   
   .myprofile-stats h3 {
@@ -112,16 +117,17 @@
     .myprofile {
       flex-direction: column;
       padding: 20px;
+      overflow-y: auto;
     }
   
     .photo-container {
       flex: none;
-      height: 320px;
+      height: 240px;
     }
   
     .myprofile-stats {
       border-left: none;
-      border-top: 1px solid #2a2a3c;
+      border-top: 1px solid #e8e8e8;
       padding-left: 0;
       padding-top: 20px;
       margin-top: 20px;

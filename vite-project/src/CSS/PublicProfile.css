@@ -1,12 +1,12 @@
 .public-profile-container {
   width: 100%;
-  min-height: calc(100vh - 60px);
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
   box-sizing: border-box;
-  background: rgba(170, 24, 58, 0.107);
+  background: var(--page-bg);
 }
 
 .public-profile-card {
