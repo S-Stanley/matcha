@@ -16,6 +16,11 @@ def create_new_view():
         "profileUserId": request.form['profileUserId'],
         "viewerUserId": user['id']
     })
+    handlers.create_notification({
+        "user_id": request.form['profileUserId'],
+        "type": "NEW_VIEW",
+        "from_user_id": user['id'],
+    })
     return new_view, 201
 
 @blueprint.route("/views/me", methods=['GET'])

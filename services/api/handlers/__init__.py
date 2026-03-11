@@ -3,3 +3,4 @@ from .views import *
 from .likes import *
 from .matches import *
 from .message import *
+from .notifications import *

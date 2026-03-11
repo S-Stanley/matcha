@@ -22,6 +22,13 @@ GET_MATCH_BY_ID = '''
     SELECT id, created FROM "Match" WHERE id=%s 
 '''
 
+GET_OTHER_MEMBER_OF_MATCH = '''
+    SELECT "MatchMember".user_id
+    FROM "Match"
+    LEFT JOIN "MatchMember" ON "Match".id =  "MatchMember".match_id
+    WHERE "Match".id = %s AND "MatchMember".user_id != %s;
+'''
+
 CHECK_IF_MATCH_ALREADY_EXIST = '''
     WITH all_user_match AS (
         SELECT "Match".id, "Match".created_at
@@ -38,8 +45,12 @@ CHECK_IF_MATCH_ALREADY_EXIST = '''
     WHERE "MatchMember".user_id = %s
 '''
 
+DELETE_ALL_CHAT_MESSAGE='''
+    DELETE FROM "Messages" WHERE match_id=%s
+'''
+
 DELETE_MATCH = '''
-    DELETE FROM "Match" WHERE id=%s
+    DELETE FROM "Match" WHERE id=%s;
 '''
 
 DELETE_MATCH_MEMBER = '''
