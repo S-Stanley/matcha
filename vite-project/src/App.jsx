@@ -7,6 +7,7 @@ import Match from './pages/Match.jsx'
 import Profile from './pages/Profile.jsx'
 import Message from './pages/Message.jsx'
 import Recherche from './pages/Recherche.jsx'
+import PublicProfile from "./pages/PublicProfile.jsx";
 import './App.css'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/match" element={<Match />} />
           <Route path="/recherche" element={<Recherche />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:userId" element={<PublicProfile />} />
           <Route path="/message" element={<Message />} />
         </Route>
       </Routes>

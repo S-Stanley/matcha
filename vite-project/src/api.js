@@ -117,3 +117,109 @@ export async function confirmPasswordChange({ username, confirmCode }) {
 
   return postForm("/users/password/change/confirm", payload);
 }
+
+export async function getMatches(token) {
+  const response = await fetch(`${API_URL}/matches`, {
+    method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function getMatchMessages(token, matchId) {
+  const response = await fetch(`${API_URL}/matches/${matchId}/message`, {
+    method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function sendMatchMessage(token, matchId, content) {
+  const response = await fetch(`${API_URL}/matches/${matchId}/message`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      token,
+    },
+    body: new URLSearchParams({ content }).toString(),
+  });
+  return parseResponse(response);
+}
+
+export async function getUsers(token) {
+  const response = await fetch(`${API_URL}/users`, {
+    method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function createLike(token, likedUserId) {
+  const response = await fetch(`${API_URL}/likes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      token,
+    },
+    body: new URLSearchParams({ liked_user: likedUserId }).toString(),
+  });
+  return parseResponse(response);
+}
+
+export async function deleteLike(token, likedUserId) {
+  const response = await fetch(`${API_URL}/likes/${likedUserId}`, {
+    method: "DELETE",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function createView(token, profileUserId) {
+  const response = await fetch(`${API_URL}/views/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      token,
+    },
+    body: new URLSearchParams({ profileUserId }).toString(),
+  });
+  return parseResponse(response);
+}
+
+export async function getViewsMe(token) {
+  const response = await fetch(`${API_URL}/views/me`, {
+    method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function getLikesMe(token) {
+  const response = await fetch(`${API_URL}/likes`, {
+    method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function getUserById(token, userId) {
+  const response = await fetch(`${API_URL}/users/${userId}`, {
+    method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}

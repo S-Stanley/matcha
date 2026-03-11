@@ -280,7 +280,15 @@ function CompleteProfile() {
               {answers.photos.map((src, i) => (
                 <div key={i} className="photo-preview">
                   <img src={src} alt="" />
-                  <button className="remove-photo" onClick={() => removePhoto(i)}>✕</button>
+                  <button
+                    type="button"
+                    className="remove-photo"
+                    aria-label="Supprimer la photo"
+                    title="Supprimer la photo"
+                    onClick={() => removePhoto(i)}
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
             </div>

@@ -54,10 +54,11 @@ GET_ALL_MATCH_BY_USER_ID = '''
         WHERE "MatchMember".user_id = %s
     )
     SELECT
+        all_user_match.id,
         "User".id,
         "User".username,
         "User".firstname,
-        "User".username
+        "User".lastname
     FROM
         all_user_match
     LEFT JOIN "MatchMember" ON "MatchMember".match_id = all_user_match.id

@@ -1,6 +1,6 @@
 import "../CSS/Profile.css";
 import { useEffect, useState } from "react";
-import { getCurrentUser } from "../api";
+import { getCurrentUser, getLikesMe, getUserById, getViewsMe } from "../api";
 
 const API_TO_GENDER = {
   MALE: "Homme",
@@ -37,17 +37,28 @@ function Profile() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [views, setViews] = useState([]);
+  const [likes, setLikes] = useState([]);
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const views = [
-    { username: "User42", date: "2026-01-20" },
-    { username: "Emma", date: "2026-01-22" },
-  ];
-
-  const likes = [
-    { username: "Lucas", date: "2026-01-21" },
-  ];
+  const getLikeUserId = (entry) => {
+    if (!entry) return null;
+    if (Array.isArray(entry)) {
+      if (entry.length >= 2) return entry[1];
+      if (entry.length === 1 && typeof entry[0] === "string") {
+        const m = entry[0].match(/\(([^,]+),([^)]+)\)/);
+        return m?.[2] || null;
+      }
+    }
+    if (typeof entry === "string") {
+      const m = entry.match(/\(([^,]+),([^)]+)\)/);
+      return m?.[2] || null;
+    }
+    if (entry.liked_by) return entry.liked_by;
+    if (entry.likedBy) return entry.likedBy;
+    return null;
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -59,7 +70,12 @@ function Profile() {
       }
 
       try {
-        const me = await getCurrentUser(token);
+        const [me, rawViews, rawLikes] = await Promise.all([
+          getCurrentUser(token),
+          getViewsMe(token).catch(() => []),
+          getLikesMe(token).catch(() => []),
+        ]);
+
         setProfile((prev) => ({
           ...prev,
           firstName: me.firstname || "",
@@ -69,6 +85,34 @@ function Profile() {
           sexualPreference: API_TO_PREFERENCE[me.preference] || "Non renseigné",
           bio: me.bio || "",
         }));
+
+        const parsedViews = (Array.isArray(rawViews) ? rawViews : []).map((row) => ({
+          id: row?.[0] || null,
+          username: row?.[2] || "unknown",
+          firstname: row?.[4] || "",
+          lastname: row?.[3] || "",
+        }));
+        setViews(parsedViews);
+
+        const likerIds = (Array.isArray(rawLikes) ? rawLikes : [])
+          .map(getLikeUserId)
+          .filter(Boolean);
+
+        if (likerIds.length > 0) {
+          const likerProfiles = await Promise.all(
+            likerIds.map((id) =>
+              getUserById(token, id).catch(() => ({
+                id,
+                username: "unknown",
+                firstname: "",
+                lastname: "",
+              }))
+            )
+          );
+          setLikes(likerProfiles);
+        } else {
+          setLikes([]);
+        }
       } catch (err) {
         setError(err?.message || "Impossible de charger le profil.");
       } finally {
@@ -172,9 +216,12 @@ function Profile() {
             <div>
               <strong>Consultations :</strong>
               <ul>
+                {views.length === 0 && <li>Aucune consultation pour le moment.</li>}
                 {views.map((view, i) => (
                   <li key={i}>
-                    {view.username} – {view.date}
+                    {(view.firstname || view.lastname)
+                      ? `${view.firstname} ${view.lastname}`.trim()
+                      : `@${view.username}`}
                   </li>
                 ))}
               </ul>
@@ -183,9 +230,12 @@ function Profile() {
             <div>
               <strong>Likes reçus :</strong>
               <ul>
+                {likes.length === 0 && <li>Aucun like reçu pour le moment.</li>}
                 {likes.map((like, i) => (
                   <li key={i}>
-                    {like.username} – {like.date}
+                    {(like.firstname || like.lastname)
+                      ? `${like.firstname} ${like.lastname}`.trim()
+                      : `@${like.username || "unknown"}`}
                   </li>
                 ))}
               </ul>

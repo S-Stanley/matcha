@@ -16,10 +16,12 @@ def get_all_matches_by_user_id(user_id):
         output = []
         for user in req:
             output.append({
-                "id": user[0],
-                "username": user[1],
-                "firstname": user[2],
-                "lastname": user[3],
+                "id": user[0],  # Backward-compatible alias of match_id
+                "match_id": user[0],
+                "user_id": user[1],
+                "username": user[2],
+                "firstname": user[3],
+                "lastname": user[4],
             })
         return output
 

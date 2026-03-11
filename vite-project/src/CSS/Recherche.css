@@ -1,12 +1,12 @@
 .recherche-container {
-    min-height: 100vh;
+    height: 100%;
     background: white;
     font-family: "Segoe UI", Roboto, sans-serif;
     color: #000;
 }
   
 .recherche-content {
-    min-height: calc(100vh - 60px);
+    height: 100%;
     padding: 20px;
     display: flex;
     justify-content: center;

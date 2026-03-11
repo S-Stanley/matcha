@@ -1,12 +1,12 @@
 .myprofile-container {
-    width: 100vw;
+    width: 100%;
     color: #000000;
     background: white;
     font-family: "Segoe UI", Roboto, sans-serif;
   }
   
 .myprofile-content {
-    min-height: calc(100vh - 60px);
+    height: 100%;
     padding: 20px;
     display: flex;
     flex-direction: column;
