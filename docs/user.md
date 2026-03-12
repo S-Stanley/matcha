@@ -35,7 +35,7 @@ curl -X POST http://127.0.0.1:5000/users/logout -d id=xxxx
 ## Update user
 
 ```bash
-curl -X PATCH http://127.0.0.1:5000/users -d email=4 -d firstname=firstname -d lastname=lastname -d bio=bio -d gender=MALE -d preference=FEMALE -d username=username -H token:5f737066-f767-4235-bbde-8765a7edff18
+curl -X PATCH http://127.0.0.1:5000/users -d email=4 -d firstname=firstname -d lastname=lastname -d bio=bio -d gender=MALE -d preference=FEMALE -d username=username -d city=Paris -H token:5f737066-f767-4235-bbde-8765a7edff18
 ```
 
 * Bio, gender and preference if not sent will be deleted, other field will just not update

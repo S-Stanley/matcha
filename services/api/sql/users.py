@@ -43,7 +43,8 @@ GET_USER_BY_ID = '''
         firstname,
         lastname,
         username,
-        popularity
+        popularity,
+        city
     FROM "User"
     WHERE id=%s
 '''
@@ -59,7 +60,8 @@ GET_USER_BY_TOKEN = '''
         bio,
         gender,
         preference,
-        popularity
+        popularity,
+        city
     FROM "User"
     WHERE token=%s
 '''
@@ -99,9 +101,10 @@ PATCH_USER = '''
         bio=%s,
         gender=%s,
         preference=%s,
-        username=%s
+        username=%s,
+        city=%s
     WHERE id=%s
-    RETURNING id, email, firstname, lastname, bio, gender, preference, username
+    RETURNING id, email, firstname, lastname, bio, gender, preference, username, popularity, city
 '''
 
 UPDATE_USER_PASSWORD='''

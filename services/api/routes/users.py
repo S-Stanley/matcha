@@ -71,6 +71,8 @@ def get_user_by_id(user_id):
             "firstname": user['firstname'],
             "lastname": user['lastname'],
             "username": user['username'],
+            "popularity": user['popularity'],
+            "city": user['city'],
             "isLiked": is_already_liked,
         }, 200
     except Exception as e:

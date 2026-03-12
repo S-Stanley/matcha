@@ -270,6 +270,8 @@ def get_user_by_id(user_id):
         "firstname": user[1],
         "lastname": user[2],
         "username": user[3],
+        "popularity": user[4],
+        "city": user[5],
     }
 
 
@@ -341,6 +343,7 @@ def get_user_by_token(token):
                 "gender": found_user[7],
                 "preference": found_user[8],
                 "popularity": found_user[9],
+                "city": found_user[10],
             }
     except Exception as e:
         print(e)
@@ -359,6 +362,7 @@ def patch_user(data, actual_user):
                     data['gender'] if 'gender' in data else None,
                     data['preference'] if 'preference' in data else None,
                     data['username'] if 'username' in data else actual_user['username'],
+                    data['city'] if 'city' in data else actual_user['city'],
                     actual_user['id']
                 )
             )
@@ -372,7 +376,9 @@ def patch_user(data, actual_user):
                 "bio": updated_user[4],
                 "gender": updated_user[5],
                 "preference": updated_user[6],
-                "username": updated_user[7]
+                "username": updated_user[7],
+                "popularity": updated_user[8],
+                "city": updated_user[9]
             }
     except Exception as e:
         print(e)
