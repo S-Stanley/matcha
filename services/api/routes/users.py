@@ -4,6 +4,16 @@ import psycopg2, os
 
 import handlers, utils
 
+@blueprint.route("/users/picture", methods=['PATCH'])
+def update_profile_picture():
+    user = handlers.get_user_by_token(request.headers.get("token"))
+    if not user:
+        return "Error", 400
+    req = utils.upload_files(user['id'], request.files['file'])
+    print(req)
+    return { "updated": True }, 200
+
+
 @blueprint.route("/users/me/notifications", methods=['PATCH'])
 def set_all_notifications_as_read_by_user_id():
     user = handlers.get_user_by_token(request.headers.get("token"))

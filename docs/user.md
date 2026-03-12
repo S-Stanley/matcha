@@ -86,3 +86,9 @@ curl http://127.0.0.1:5000/users/me/notifications -H token:5f737066-f767-4235-bb
 ```bash
 curl -X PATCH http://127.0.0.1:5000/users/me/notifications -H token:5f737066-f767-4235-bbde-8765a7edff18
 ```
+
+## Update profil picture
+
+```bash
+curl -X PATCH http://127.0.0.1:5000/users/picture -H token:5f737066-f767-4235-bbde-8765a7edff18 -F "file=@/assets/img.jpg"
+```
