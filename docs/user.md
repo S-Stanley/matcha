@@ -92,3 +92,11 @@ curl -X PATCH http://127.0.0.1:5000/users/me/notifications -H token:5f737066-f76
 ```bash
 curl -X PATCH http://127.0.0.1:5000/users/picture -H token:5f737066-f767-4235-bbde-8765a7edff18 -F "file=@/assets/img.jpg"
 ```
+
+## Add or delete tag
+
+```bash
+curl -X PATCH http://127.0.0.1:5000/users/tag/geek -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
+
+If the tag does not exist for this user it will be created, if already exist for this user is will be deleted

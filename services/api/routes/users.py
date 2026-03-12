@@ -4,13 +4,20 @@ import psycopg2, os
 
 import handlers, utils
 
+@blueprint.route("/users/tag/<tag_name>", methods=['PATCH'])
+def update_tag(tag_name):
+    user = handlers.get_user_by_token(request.headers.get("token"))
+    if not user:
+        return "Error", 400
+    handlers.create_or_delete_tag(user['id'], tag_name)
+    return { "updated": True }, 200
+
 @blueprint.route("/users/picture", methods=['PATCH'])
 def update_profile_picture():
     user = handlers.get_user_by_token(request.headers.get("token"))
     if not user:
         return "Error", 400
     req = utils.upload_files(user['id'], request.files['file'])
-    print(req)
     return { "updated": True }, 200
 
 

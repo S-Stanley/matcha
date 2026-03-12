@@ -2,6 +2,53 @@ import psycopg2, os, sql, bcrypt, uuid, utils
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
+def add_tag(user_id, tag):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.tags.ADD_TAG,
+            (
+                user_id,
+                tag,
+            )
+        )
+        conn.commit()
+
+def delete_tag(user_id, tag):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.tags.DELETE_TAG,
+            (
+                user_id,
+                tag,
+            )
+        )
+        conn.commit()
+
+def is_tag_exist_for_user(user_id, tag):
+    with conn.cursor() as cur:
+        req = cur.execute(
+            sql.tags.CHECK_IF_TAG_EXIST_FOR_USER,
+            (
+                user_id,
+                tag,
+            )
+        )
+        req = cur.fetchall()
+        conn.commit()
+        if req is None or len(req) == 0:
+            return False
+        return True
+
+def create_or_delete_tag(user_id, tag):
+    print(
+
+    is_tag_exist_for_user(user_id, tag)
+            )
+    if is_tag_exist_for_user(user_id, tag):
+        delete_tag(user_id, tag)
+    else:
+        add_tag(user_id, tag)
+
 def set_all_user_notifications_as_read(user_id):
     with conn.cursor() as cur:
         cur.execute(

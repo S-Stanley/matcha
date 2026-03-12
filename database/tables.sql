@@ -27,6 +27,13 @@ CREATE TABLE "User" (
   created_at      timestamp       DEFAULT NOW()
 );
 
+CREATE TABLE "Tags" (
+  id              UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  user_id         UUID            NOT NULL references "User"(id),
+  tag             TEXT            NOT NULL,
+  created_at      timestamp       DEFAULT NOW()
+);
+
 CREATE TABLE "NewPasswordRequest" (
   id              UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
   user_id         UUID            NOT NULL references "User"(id),
