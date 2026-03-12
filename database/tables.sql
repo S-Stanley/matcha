@@ -24,6 +24,7 @@ CREATE TABLE "User" (
   password        VARCHAR(150)    NOT NULL,
   confirm_code    VARCHAR(4)      DEFAULT FLOOR(1 + (RANDOM() * 10000))::TEXT,
   picture_url     TEXT            DEFAULT NULL,
+  popularity      INTEGER         DEFAULT 0,
   created_at      timestamp       DEFAULT NOW()
 );
 

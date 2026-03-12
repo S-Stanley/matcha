@@ -1,5 +1,5 @@
 GET_ALL_USERS = '''
-    SELECT id, username, firstname, lastname FROM "User";
+    SELECT id, username, firstname, lastname, popularity FROM "User";
 '''
 
 DELETE_CONFIRMATION_CODE='''
@@ -42,7 +42,8 @@ GET_USER_BY_ID = '''
         id,
         firstname,
         lastname,
-        username
+        username,
+        popularity
     FROM "User"
     WHERE id=%s
 '''
@@ -57,7 +58,8 @@ GET_USER_BY_TOKEN = '''
         token,
         bio,
         gender,
-        preference
+        preference,
+        popularity
     FROM "User"
     WHERE token=%s
 '''

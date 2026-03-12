@@ -92,6 +92,7 @@ def get_all_users():
                 "username": user[1],
                 "firstname": user[2],
                 "lastname": user[3],
+                "popularity": user[4],
             })
         return output
     
@@ -339,6 +340,7 @@ def get_user_by_token(token):
                 "bio": found_user[6],
                 "gender": found_user[7],
                 "preference": found_user[8],
+                "popularity": found_user[9],
             }
     except Exception as e:
         print(e)
