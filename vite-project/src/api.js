@@ -100,6 +100,20 @@ export async function patchCurrentUser(token, payload) {
   return parseResponse(response);
 }
 
+export async function patchProfilePicture(token, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_URL}/users/picture`, {
+    method: "PATCH",
+    headers: {
+      token,
+    },
+    body: formData,
+  });
+  return parseResponse(response);
+}
+
 export async function requestPasswordChange({ username, password }) {
   const payload = {
     username: username?.trim() || "",
@@ -217,6 +231,36 @@ export async function getLikesMe(token) {
 export async function getUserById(token, userId) {
   const response = await fetch(`${API_URL}/users/${userId}`, {
     method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function getUserNotifications(token) {
+  const response = await fetch(`${API_URL}/users/me/notifications`, {
+    method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function markAllNotificationsAsRead(token) {
+  const response = await fetch(`${API_URL}/users/me/notifications`, {
+    method: "PATCH",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function toggleUserTag(token, tagName) {
+  const response = await fetch(`${API_URL}/users/tag/${encodeURIComponent(tagName)}`, {
+    method: "PATCH",
     headers: {
       token,
     },

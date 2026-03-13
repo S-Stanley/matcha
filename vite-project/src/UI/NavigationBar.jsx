@@ -1,10 +1,116 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import "../CSS/NavigationBar.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  getUserNotifications,
+  getUserById,
+  getUsers,
+  markAllNotificationsAsRead,
+} from "../api";
+
+function normalizeNotification(raw) {
+  if (Array.isArray(raw)) {
+    return {
+      id: raw[0],
+      type: raw[1],
+      from_user_id: raw[2],
+      created_at: raw[3],
+    };
+  }
+  return {
+    id: raw?.id,
+    type: raw?.type,
+    from_user_id: raw?.from_user_id || raw?.fromUserId,
+    created_at: raw?.created_at || raw?.createdAt,
+  };
+}
 
 export default function NavigationBar() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(true);
+  const [notifications, setNotifications] = useState([]);
+  const [notifUsersById, setNotifUsersById] = useState({});
+  const notifRef = useRef(null);
+
+  useEffect(() => {
+    const loadNotifications = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setNotifLoading(false);
+        setNotifications([]);
+        return;
+      }
+      setNotifLoading(true);
+      try {
+        const [data, userList] = await Promise.all([
+          getUserNotifications(token),
+          getUsers(token).catch(() => []),
+        ]);
+        const list = (Array.isArray(data) ? data : []).map(normalizeNotification);
+        setNotifications(list);
+        const usersMap = {};
+        (Array.isArray(userList) ? userList : []).forEach((u) => {
+          usersMap[String(u.id)] = u;
+        });
+
+        const uniqueFromIds = [...new Set(list.map((n) => n.from_user_id).filter(Boolean))];
+        if (uniqueFromIds.length > 0) {
+          const users = await Promise.all(
+            uniqueFromIds.map((id) =>
+              getUserById(token, id).catch(() => usersMap[String(id)] || {
+                id,
+                username: "unknown",
+                firstname: "",
+                lastname: "",
+              })
+            )
+          );
+          const map = {};
+          users.forEach((u) => {
+            map[String(u.id)] = u;
+          });
+          setNotifUsersById(map);
+        } else {
+          setNotifUsersById({});
+        }
+      } catch (_) {
+        setNotifications([]);
+      } finally {
+        setNotifLoading(false);
+      }
+    };
+
+    loadNotifications();
+    const timer = setInterval(loadNotifications, 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  const handleOpenNotifications = async () => {
+    const nextOpen = !notifOpen;
+    setNotifOpen(nextOpen);
+    if (!notifOpen && notifications.length > 0) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          await markAllNotificationsAsRead(token);
+        } catch (_) {
+          // Ignore backend errors, keep dropdown usable.
+        }
+      }
+    }
+  };
 
   const handleLogout = async () => {
     setLoading(true);
@@ -41,7 +147,42 @@ export default function NavigationBar() {
 
   return (
     <div className="top-bar">
-      <div className="top-side-spacer" aria-hidden="true" />
+      <div className="top-left-controls" ref={notifRef}>
+        <button
+          className="notif-button"
+          onClick={handleOpenNotifications}
+          aria-label="Notifications"
+          title="Notifications"
+        >
+          🔔
+          {notifications.length > 0 && (
+            <span className="notif-badge">{notifications.length}</span>
+          )}
+        </button>
+        {notifOpen && (
+          <div className="notif-dropdown">
+            <h4>Notifications</h4>
+            {notifLoading && <p>Chargement...</p>}
+            {!notifLoading && notifications.length === 0 && <p>Aucune notification.</p>}
+            {!notifLoading &&
+              notifications.map((n) => {
+                const fromUser = notifUsersById[String(n.from_user_id)];
+                const fromLabel = fromUser
+                  ? ((fromUser.firstname || fromUser.lastname)
+                    ? `${fromUser.firstname} ${fromUser.lastname}`.trim()
+                    : `@${fromUser.username}`)
+                  : "Un utilisateur";
+                return (
+                  <div key={n.id} className="notif-item">
+                    <p className="notif-text">
+                      {n.type || "Notification"} - {fromLabel}
+                    </p>
+                  </div>
+                );
+              })}
+          </div>
+        )}
+      </div>
       <div className="top-center">
         <NavLink
           to="/match"

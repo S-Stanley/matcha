@@ -95,6 +95,124 @@
     max-width: 300px;
     margin-top: 24px;
 }
+
+.profile-photo-upload {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d9d9d9;
+  background: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.profile-photo-upload input {
+  display: none;
+}
+
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.profile-edit-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.profile-edit-grid input,
+.profile-edit-grid select,
+.profile-edit-grid textarea {
+  width: 100%;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.profile-edit-grid textarea {
+  resize: vertical;
+}
+
+.profile-edit-full {
+  grid-column: 1 / -1;
+}
+
+.profile-edit-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.profile-edit-actions .edit-profile-btn,
+.profile-edit-actions .secondary-btn {
+  flex: 1;
+  height: 42px;
+  min-width: 0;
+  max-width: none;
+  margin-top: 0;
+  padding: 0 16px;
+}
+
+.secondary-btn {
+  border: 1px solid #cfd4dc;
+  background: #f3f5f8;
+  color: #1f2937;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background: #e7ebf1;
+  border-color: #b8c0cc;
+}
+
+.tags-title {
+  margin: 4px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tags-select-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-select-btn {
+  border: 1px solid #d5d9e0;
+  background: #fff;
+  color: #374151;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tag-select-btn.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
   
 .myprofile-stats {
   flex: 0 0 260px;
@@ -131,6 +249,10 @@
       padding-left: 0;
       padding-top: 20px;
       margin-top: 20px;
+    }
+
+    .profile-edit-grid {
+      grid-template-columns: 1fr;
     }
   }
   

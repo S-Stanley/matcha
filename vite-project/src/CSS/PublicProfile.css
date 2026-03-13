@@ -11,10 +11,11 @@
 
 .public-profile-card {
   width: min(520px, 92vw);
-  background: #fff;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
   border-radius: 18px;
   padding: 26px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.12);
+  border: 1px solid #eceef2;
   text-align: center;
 }
 
@@ -41,6 +42,15 @@
   justify-content: center;
 }
 
+.public-photo {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 14px;
+  display: block;
+}
+
 .public-username {
   margin: 4px 0 0;
   color: #666;
@@ -50,4 +60,53 @@
   margin-top: 10px;
   color: #999;
   font-size: 0.9rem;
+}
+
+.public-meta {
+  margin: 0;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e6ebf2;
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.public-info-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.public-tags {
+  margin-top: 10px;
+  color: #334155;
+  text-align: left;
+}
+
+.public-tags-row {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.public-tag {
+  background: #111827;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.public-no-tags {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .public-info-grid {
+    grid-template-columns: 1fr;
+  }
 }

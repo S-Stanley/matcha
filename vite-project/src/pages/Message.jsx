@@ -1,7 +1,7 @@
 import "../CSS/Message.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { deleteLike, getLikesMe, getMatchMessages, getMatches, getUserById, sendMatchMessage } from "../api";
+import { deleteLike, getLikesMe, getMatchMessages, getMatches, getUserById, getUsers, sendMatchMessage } from "../api";
 
 function normalizeMessage(item) {
   if (Array.isArray(item)) {
@@ -55,8 +55,17 @@ function Message() {
   const [error, setError] = useState("");
   const [isLive, setIsLive] = useState(true);
   const messagesContainerRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   const currentUserId = localStorage.getItem("userId");
+  const getMatchPeerUserId = (match) =>
+    String(
+      match?.user_id ||
+      match?.matched_user_id ||
+      match?.liked_by ||
+      match?.liked_user ||
+      ""
+    );
 
   useEffect(() => {
     const loadMatches = async () => {
@@ -94,7 +103,14 @@ function Message() {
       if (!token) return;
       setLoadingLikes(true);
       try {
-        const raw = await getLikesMe(token);
+        const [raw, users] = await Promise.all([
+          getLikesMe(token),
+          getUsers(token).catch(() => []),
+        ]);
+        const usersMap = {};
+        (Array.isArray(users) ? users : []).forEach((u) => {
+          usersMap[String(u.id)] = u;
+        });
         const likerIds = (Array.isArray(raw) ? raw : [])
           .map(extractLikedById)
           .filter(Boolean);
@@ -102,12 +118,12 @@ function Message() {
           setLikes([]);
           return;
         }
-        const users = await Promise.all(
+        const likeUsers = await Promise.all(
           likerIds.map((id) =>
-            getUserById(token, id).catch(() => ({ id, username: "unknown", firstname: "", lastname: "" }))
+            getUserById(token, id).catch(() => usersMap[String(id)] || { id, username: "unknown", firstname: "", lastname: "" })
           )
         );
-        setLikes(users);
+        setLikes(likeUsers);
       } catch (_) {
         setLikes([]);
       } finally {
@@ -141,6 +157,15 @@ function Message() {
           return list;
         });
       } catch (err) {
+        if (err?.status === 400 || err?.status === 404) {
+          setMatches((prev) =>
+            prev.filter((m) => String(m.match_id || m.id) !== String(selectedMatchId))
+          );
+          setSelectedMatchId("");
+          setSearchParams({});
+          setMessages([]);
+          return;
+        }
         setError(err?.message || "Impossible de charger les messages.");
         if (!silent) {
           setMessages([]);
@@ -221,6 +246,27 @@ function Message() {
     try {
       await deleteLike(token, likedUserId);
       setLikes((prev) => prev.filter((u) => String(u.id) !== String(likedUserId)));
+      setMatches((prev) => {
+        const nextMatches = prev.filter(
+          (m) => getMatchPeerUserId(m) !== String(likedUserId)
+        );
+        const currentStillExists = nextMatches.some(
+          (m) => String(m.match_id || m.id) === String(selectedMatchId)
+        );
+        if (!currentStillExists) {
+          const nextSelected = nextMatches[0]
+            ? String(nextMatches[0].match_id || nextMatches[0].id)
+            : "";
+          setSelectedMatchId(nextSelected);
+          if (nextSelected) {
+            setSearchParams({ matchId: nextSelected });
+          } else {
+            setSearchParams({});
+            setMessages([]);
+          }
+        }
+        return nextMatches;
+      });
     } catch (err) {
       setError(err?.message || "Impossible de supprimer ce like.");
     } finally {
@@ -232,6 +278,7 @@ function Message() {
     const el = messagesContainerRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, selectedMatchId]);
 
   return (
@@ -326,6 +373,7 @@ function Message() {
                     <p>{msg.content}</p>
                   </div>
                 ))}
+              <div ref={messagesEndRef} />
             </div>
 
             <form className="chat-input-row" onSubmit={handleSend}>

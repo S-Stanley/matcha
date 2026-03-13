@@ -1,12 +1,13 @@
 import "../CSS/CompleteProfile.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, patchCurrentUser } from "../api";
+import { getCurrentUser, patchCurrentUser, patchProfilePicture, toggleUserTag } from "../api";
 
 const GENDER_TO_API = {
   Homme: "MALE",
   Femme: "FEMALE",
   Autre: "OTHERS",
+  "Ne se prononce pas": "DO NOT PRONONCE",
 };
 
 const API_TO_GENDER = {
@@ -40,16 +41,17 @@ function CompleteProfile() {
     gender: "",
     preference: "",
     bio: "",
-    hobby: [],
+    tags: [],
     photos: [],
   });
+  const [photoFile, setPhotoFile] = useState(null);
 
   // --- LISTE DES ÉTAPES ---
   const steps = [
-    { question: "Quel est votre genre ?", key: "gender", type: "choices", options: ["Homme", "Femme", "Autre"] },
+    { question: "Quel est votre genre ?", key: "gender", type: "choices", options: ["Homme", "Femme", "Autre", "Ne se prononce pas"] },
     { question: "Quel genre recherchez-vous ?", key: "preference", type: "choices", options: ["Homme", "Femme", "Les deux"] },
     { question: "Dites-en plus sur vous", key: "bio", type: "textarea" },
-    { question: "Choisissez vos loisirs", key: "hobby", type: "multi", options: ["Sport", "Jeux vidéo", "Voyages", "Cinéma", "Cuisine"] },
+    { question: "Choisissez vos tags", key: "tags", type: "multi", options: ["sport", "cinema", "musique", "voyage", "cuisine", "jeux", "lecture", "tech"] },
     { question: "Ajoutez vos photos", key: "photos", type: "photos" },
     { question: "Résumé de votre profil", key: "summary", type: "summary" } // <-- NOUVELLE ÉTAPE
   ];
@@ -110,22 +112,21 @@ function CompleteProfile() {
     setAnswers({ ...answers, [current.key]: e.target.value });
   };
 
-  // --- UPLOAD PHOTOS (max 5) ---
+  // --- UPLOAD PHOTO UNIQUE ---
   const handlePhotoUpload = (e) => {
-    const files = [...e.target.files];
-    if (answers.photos.length + files.length > 5) {
-      alert("Maximum 5 photos.");
-      return;
-    }
-    const previews = files.map((f) => URL.createObjectURL(f));
-    setAnswers({ ...answers, photos: [...answers.photos, ...previews] });
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const preview = URL.createObjectURL(file);
+    setAnswers({ ...answers, photos: [preview] });
+    setPhotoFile(file);
   };
 
-  const removePhoto = (i) => {
+  const removePhoto = () => {
     setAnswers({
       ...answers,
-      photos: answers.photos.filter((_, index) => index !== i)
+      photos: []
     });
+    setPhotoFile(null);
   };
 
   // --- NAVIGATION ---
@@ -157,6 +158,15 @@ function CompleteProfile() {
         gender: GENDER_TO_API[answers.gender],
         preference: PREFERENCE_TO_API[answers.preference],
       });
+      if (answers.tags.length > 0) {
+        await Promise.all(answers.tags.map((tag) => toggleUserTag(token, tag)));
+      }
+      if (photoFile) {
+        await patchProfilePicture(token, photoFile);
+      }
+      const tagsKey = `profile_tags_${userBase.username || "me"}`;
+      localStorage.setItem(tagsKey, JSON.stringify(answers.tags));
+      localStorage.removeItem("profile_tags_me");
       navigate("/match", { replace: true });
     } catch (err) {
       setError(err?.message || "Erreur lors de la mise à jour du profil.");
@@ -205,9 +215,9 @@ function CompleteProfile() {
             </div>
 
             <div className="summary-item">
-              <h3>Loisirs</h3>
+              <h3>Tags</h3>
               <div className="hobby-badges">
-                {answers.hobby.map((h) => (
+                {answers.tags.map((h) => (
                   <span key={h} className="hobby-badge">{h}</span>
                 ))}
               </div>
@@ -273,19 +283,19 @@ function CompleteProfile() {
           <>
             <label className="upload-box">
               + Ajouter une photo
-              <input type="file" multiple accept="image/*" onChange={handlePhotoUpload} />
+              <input type="file" accept="image/*" onChange={handlePhotoUpload} />
             </label>
 
             <div className="photo-preview-grid">
-              {answers.photos.map((src, i) => (
-                <div key={i} className="photo-preview">
+              {answers.photos.map((src) => (
+                <div key={src} className="photo-preview">
                   <img src={src} alt="" />
                   <button
                     type="button"
                     className="remove-photo"
                     aria-label="Supprimer la photo"
                     title="Supprimer la photo"
-                    onClick={() => removePhoto(i)}
+                    onClick={removePhoto}
                   >
                     ×
                   </button>

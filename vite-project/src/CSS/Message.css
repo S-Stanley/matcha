@@ -116,11 +116,12 @@
 
 .chat-panel {
   padding: 16px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   gap: 12px;
   height: 100%;
   min-height: 0;
+  overflow: hidden;
 }
 
 .chat-header {
@@ -180,11 +181,11 @@
 }
 
 .chat-messages {
-  flex: 1;
+  height: min(52vh, 460px);
   overflow-y: auto;
   scrollbar-gutter: stable;
-  min-height: 0;
-  max-height: 100%;
+  min-height: 220px;
+  max-height: min(52vh, 460px);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -250,5 +251,10 @@
 
   .chat-panel {
     height: 100%;
+  }
+
+  .chat-messages {
+    height: min(46vh, 360px);
+    max-height: min(46vh, 360px);
   }
 }
