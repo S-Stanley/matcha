@@ -1,3 +1,7 @@
+STORE_PICTURE = '''
+    UPDATE "User" SET picture_url=%s WHERE id=%s
+'''
+
 GET_ALL_USERS = '''
     SELECT id, username, firstname, lastname, popularity FROM "User";
 '''
@@ -61,7 +65,8 @@ GET_USER_BY_TOKEN = '''
         gender,
         preference,
         popularity,
-        city
+        city,
+        picture_url
     FROM "User"
     WHERE token=%s
 '''

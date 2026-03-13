@@ -2,6 +2,17 @@ import psycopg2, os, sql, bcrypt, uuid, utils
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
+def store_picture(user_id, url):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.STORE_PICTURE,
+            (
+                url,
+                user_id,
+            )
+        )
+        conn.commit()
+
 def add_tag(user_id, tag):
     with conn.cursor() as cur:
         cur.execute(
@@ -344,6 +355,7 @@ def get_user_by_token(token):
                 "preference": found_user[8],
                 "popularity": found_user[9],
                 "city": found_user[10],
+                "picture_url": found_user[11],
             }
     except Exception as e:
         print(e)

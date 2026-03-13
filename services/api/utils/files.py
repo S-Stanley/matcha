@@ -12,3 +12,4 @@ def upload_files(public_id, file):
     )
     print(response.file_id)
     print(response.url)
+    return response.url

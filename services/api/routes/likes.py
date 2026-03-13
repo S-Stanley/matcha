@@ -10,7 +10,6 @@ def delete_like_endpoint(liked_user_id):
         return "Error", 400
     has_existing_match = handlers.check_if_match_exist([liked_user_id, connected_user['id']])
     handlers.delete_like(liked_user_id, connected_user['id'])
-    print("**", has_existing_match)
     if has_existing_match:
         handlers.delete_match_from_unlike(has_existing_match['id']);
         handlers.create_notification({
@@ -25,6 +24,8 @@ def create_like():
     user = handlers.get_user_by_token(request.headers.get("token"))
     if not user:
         return "Error", 400
+    if not user['picture_url']:
+        return "Error, cannot like without picture", 400
     like_created = handlers.create_like({
         "liked_by": user['id'],
         "liked_user": request.form['liked_user']

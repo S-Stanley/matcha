@@ -17,8 +17,9 @@ def update_profile_picture():
     user = handlers.get_user_by_token(request.headers.get("token"))
     if not user:
         return "Error", 400
-    req = utils.upload_files(user['id'], request.files['file'])
-    return { "updated": True }, 200
+    url = utils.upload_files(user['id'], request.files['file'])
+    handlers.store_picture(user['id'], url)
+    return { "url": url }, 200
 
 
 @blueprint.route("/users/me/notifications", methods=['PATCH'])
@@ -73,6 +74,7 @@ def get_user_by_id(user_id):
             "username": user['username'],
             "popularity": user['popularity'],
             "city": user['city'],
+            "picture_url": user['picture_url'],
             "isLiked": is_already_liked,
         }, 200
     except Exception as e:
