@@ -1,6 +1,50 @@
 import psycopg2, os, sql, bcrypt, uuid, utils
+from datetime import datetime, timedelta
 
 conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+
+def create_login(user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.CREATE_LOGIN,
+            (
+                user_id,
+            )
+        )
+        conn.commit()
+
+def create_report(user_id, from_user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.CREATE_REPORT,
+            (
+                user_id,
+                from_user_id,
+            )
+        )
+        conn.commit()
+
+def create_block(user_id, from_user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.CREATE_BLOCK,
+            (
+                user_id,
+                from_user_id,
+            )
+        )
+        conn.commit()
+
+def is_blocked(user_id, from_user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.IS_BLOCKED,
+            (
+                url,
+                user_id,
+            )
+        )
+        conn.commit()
 
 def store_picture(user_id, url):
     with conn.cursor() as cur:
@@ -283,6 +327,8 @@ def get_user_by_id(user_id):
         "username": user[3],
         "popularity": user[4],
         "city": user[5],
+        "picture_url": user[6],
+        "last_login": user[7],
     }
 
 

@@ -4,6 +4,24 @@ import psycopg2, os
 
 import handlers, utils
 
+@blueprint.route("/users/<blocked_user_id>/block", methods=['POST'])
+def report_user(blocked_user_id):
+    user = handlers.get_user_by_token(request.headers.get("token"))
+    if not user:
+        return "Error", 400
+    handlers.create_block(blocked_user_id, user['id'])
+    has_existing_match = handlers.check_if_match_exist([blocked_user_id, user['id']])
+    handlers.delete_match_from_unlike(has_existing_match['id']);
+    return { "is_blocked": True }, 200
+
+@blueprint.route("/users/<reported_user_id>/report", methods=['POST'])
+def block_user(reported_user_id):
+    user = handlers.get_user_by_token(request.headers.get("token"))
+    if not user:
+        return "Error", 400
+    handlers.create_report(reported_user_id, user['id'])
+    return { "reported": True }, 200
+
 @blueprint.route("/users/tag/<tag_name>", methods=['PATCH'])
 def update_tag(tag_name):
     user = handlers.get_user_by_token(request.headers.get("token"))
@@ -76,6 +94,7 @@ def get_user_by_id(user_id):
             "city": user['city'],
             "picture_url": user['picture_url'],
             "isLiked": is_already_liked,
+            "last_login": user['last_login'],
         }, 200
     except Exception as e:
         print(e)
@@ -87,6 +106,7 @@ def confirm_user_signup():
     if not user:
         print("Wrong confirmation conde")
         return "Error", 400
+    handlers.create_login(user['id'])
     return user, 200
 
 @blueprint.route("/users", methods=['POST'])
@@ -110,6 +130,7 @@ def create_user():
         if not new_user:
             print("Error while trying to create user", not new_user)
             return "Error", 400
+        print("code", new_user['confirm_code'])
         if not utils.send_signup_confirmation_email(
             dest={"email": new_user['email'], "name": new_user['firstname']},
             confirmation_code=new_user['confirm_code']
@@ -132,6 +153,7 @@ def connect_user():
         user = handlers.users.connect_user(request.form);
         if not user:
             return "Error", 401
+        handlers.create_login(user['id'])
         return jsonify(user)
     except Exception as e:
         print(e)

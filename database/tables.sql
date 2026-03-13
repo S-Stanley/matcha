@@ -29,6 +29,26 @@ CREATE TABLE "User" (
   created_at      timestamp       DEFAULT NOW()
 );
 
+CREATE TABLE "Login" ( 
+  id              UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  user_id         UUID            NOT NULL references "User"(id),
+  created_at      timestamp       DEFAULT NOW()
+);
+
+CREATE TABLE "Report" (
+  id              UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  user_id         UUID            NOT NULL references "User"(id),
+  from_user_id    UUID            NOT NULL references "User"(id),
+  created_at      timestamp       DEFAULT NOW()
+);
+
+CREATE TABLE "Block" (
+  id              UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  user_id         UUID            NOT NULL references "User"(id),
+  from_user_id    UUID            NOT NULL references "User"(id),
+  created_at      timestamp       DEFAULT NOW()
+);
+
 CREATE TABLE "Tags" (
   id              UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
   user_id         UUID            NOT NULL references "User"(id),

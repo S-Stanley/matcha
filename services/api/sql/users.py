@@ -1,3 +1,19 @@
+CREATE_LOGIN='''
+    INSERT INTO "Login" (user_id) VALUES (%s);
+'''
+
+CREATE_REPORT = '''
+    INSERT INTO "Report" (user_id, from_user_id) VALUES (%s, %s);
+'''
+
+CREATE_BLOCK = '''
+    INSERT INTO "Block" (user_id, from_user_id) VALUES (%s, %s);
+'''
+
+IS_BLOCKED = '''
+    SELECT id FROM "Block" WHERE user_id=%s AND from_user_id=%s;
+'''
+
 STORE_PICTURE = '''
     UPDATE "User" SET picture_url=%s WHERE id=%s
 '''
@@ -48,7 +64,9 @@ GET_USER_BY_ID = '''
         lastname,
         username,
         popularity,
-        city
+        city,
+        picture_url,
+        (SELECT created_at FROM "Login" WHERE user_id="User".id ORDER BY created_at DESC LIMIT 1) as last_login
     FROM "User"
     WHERE id=%s
 '''

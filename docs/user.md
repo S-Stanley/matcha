@@ -100,3 +100,15 @@ curl -X PATCH http://127.0.0.1:5000/users/tag/geek -H token:5f737066-f767-4235-b
 ```
 
 If the tag does not exist for this user it will be created, if already exist for this user is will be deleted
+
+## Report user
+
+```bash
+curl -X POST http://127.0.0.1:5000/users/8d622fc8-a8cf-46d8-b705-aa095aa68dc6/report -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
+
+## Block user
+
+```bash
+curl -X POST http://127.0.0.1:5000/users/8d622fc8-a8cf-46d8-b705-aa095aa68dc6/block -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
