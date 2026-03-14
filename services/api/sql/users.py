@@ -14,10 +14,6 @@ IS_BLOCKED = '''
     SELECT id FROM "Block" WHERE user_id=%s AND from_user_id=%s;
 '''
 
-STORE_PICTURE = '''
-    UPDATE "User" SET picture_url=%s WHERE id=%s
-'''
-
 GET_ALL_USERS = '''
     SELECT id, username, firstname, lastname, popularity FROM "User";
 '''
@@ -65,7 +61,6 @@ GET_USER_BY_ID = '''
         username,
         popularity,
         city,
-        picture_url,
         (SELECT created_at FROM "Login" WHERE user_id="User".id ORDER BY created_at DESC LIMIT 1) as last_login
     FROM "User"
     WHERE id=%s
@@ -83,8 +78,7 @@ GET_USER_BY_TOKEN = '''
         gender,
         preference,
         popularity,
-        city,
-        picture_url
+        city
     FROM "User"
     WHERE token=%s
 '''

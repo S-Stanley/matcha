@@ -23,9 +23,15 @@ CREATE TABLE "User" (
   token           VARCHAR(36)     UNIQUE,
   password        VARCHAR(150)    NOT NULL,
   confirm_code    VARCHAR(4)      DEFAULT FLOOR(1 + (RANDOM() * 10000))::TEXT,
-  picture_url     TEXT            DEFAULT NULL,
   popularity      INTEGER         DEFAULT 0,
   city            TEXT            DEFAULT NULL,
+  created_at      timestamp       DEFAULT NOW()
+);
+
+CREATE TABLE "Picture" (
+  id              UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  user_id         UUID            NOT NULL references "User"(id),
+  url             TEXT            NOT NULL,
   created_at      timestamp       DEFAULT NOW()
 );
 

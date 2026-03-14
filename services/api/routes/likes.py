@@ -24,7 +24,7 @@ def create_like():
     user = handlers.get_user_by_token(request.headers.get("token"))
     if not user:
         return "Error", 400
-    if not user['picture_url']:
+    if handlers.get_pictures_count_by_user_id(user['id']) == 0:
         return "Error, cannot like without picture", 400
     like_created = handlers.create_like({
         "liked_by": user['id'],

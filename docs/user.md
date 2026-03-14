@@ -54,7 +54,6 @@ curl http://127.0.0.1:5000/users/me -H token:5f737066-f767-4235-bbde-8765a7edff1
 curl http://127.0.0.1:5000/users/8d622fc8-a8cf-46d8-b705-aa095aa68dc6 -H token:5f737066-f767-4235-bbde-8765a7edff18
 ```
 
-
 ## Request new password:
 
 ```bash
@@ -87,10 +86,18 @@ curl http://127.0.0.1:5000/users/me/notifications -H token:5f737066-f767-4235-bb
 curl -X PATCH http://127.0.0.1:5000/users/me/notifications -H token:5f737066-f767-4235-bbde-8765a7edff18
 ```
 
-## Update profil picture
+## Add a new picture
 
 ```bash
 curl -X PATCH http://127.0.0.1:5000/users/picture -H token:5f737066-f767-4235-bbde-8765a7edff18 -F "file=@./assets/img.jpg"
+```
+
+* Up to 5 pictures
+
+## delete a picture
+
+```bash
+curl -X DELETE http://127.0.0.1:5000/users/picture/<picture_id> -H token:5f737066-f767-4235-bbde-8765a7edff18
 ```
 
 ## Add or delete tag

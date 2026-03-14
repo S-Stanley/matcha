@@ -46,12 +46,62 @@ def is_blocked(user_id, from_user_id):
         )
         conn.commit()
 
-def store_picture(user_id, url):
+def get_pictures_count_by_user_id(user_id):
     with conn.cursor() as cur:
         cur.execute(
-            sql.users.STORE_PICTURE,
+            sql.pictures.COUNT_PICTURES_BY_USER_ID,
             (
+                user_id,
+            )
+        )
+        res = cur.fetchone()
+        conn.commit()
+        return res[0] if res else 0
+
+def create_picture(user_id, url):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.pictures.CREATE_PICTURE,
+            (
+                user_id,
                 url,
+            )
+        )
+        picture = cur.fetchone()
+        conn.commit()
+        return {
+            "id": picture[0],
+            "user_id": picture[1],
+            "url": picture[2],
+            "created_at": picture[3],
+        }
+
+def get_pictures_by_user_id(user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.pictures.GET_PICTURES_BY_USER_ID,
+            (
+                user_id,
+            )
+        )
+        rows = cur.fetchall()
+        conn.commit()
+        return [
+            {
+                "id": row[0],
+                "user_id": row[1],
+                "url": row[2],
+                "created_at": row[3],
+            }
+            for row in rows
+        ]
+
+def delete_picture_by_id_for_user(picture_id, user_id):
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.pictures.DELETE_PICTURE_BY_ID_AND_USER_ID,
+            (
+                picture_id,
                 user_id,
             )
         )
@@ -327,8 +377,7 @@ def get_user_by_id(user_id):
         "username": user[3],
         "popularity": user[4],
         "city": user[5],
-        "picture_url": user[6],
-        "last_login": user[7],
+        "last_login": user[6],
     }
 
 
@@ -401,7 +450,6 @@ def get_user_by_token(token):
                 "preference": found_user[8],
                 "popularity": found_user[9],
                 "city": found_user[10],
-                "picture_url": found_user[11],
             }
     except Exception as e:
         print(e)

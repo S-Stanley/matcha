@@ -6,3 +6,4 @@ from .message import *
 from .new_password_request import *
 from .notifications import *
 from .tags import *
+from .pictures import *

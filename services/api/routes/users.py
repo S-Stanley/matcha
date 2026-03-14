@@ -31,13 +31,26 @@ def update_tag(tag_name):
     return { "updated": True }, 200
 
 @blueprint.route("/users/picture", methods=['PATCH'])
-def update_profile_picture():
+def add_profile_picture():
     user = handlers.get_user_by_token(request.headers.get("token"))
     if not user:
         return "Error", 400
+    if 'file' not in request.files:
+        return "Error, file is required", 400
+    current_count = handlers.get_pictures_count_by_user_id(user['id'])
+    if current_count >= 5:
+        return "Error, cannot upload more than 5 pictures", 400
     url = utils.upload_files(user['id'], request.files['file'])
-    handlers.store_picture(user['id'], url)
-    return { "url": url }, 200
+    picture = handlers.create_picture(user['id'], url)
+    return { "picture": picture, "total": current_count + 1 }, 201
+
+@blueprint.route("/users/picture/<picture_id>", methods=['DELETE'])
+def delete_profile_picture(picture_id):
+    user = handlers.get_user_by_token(request.headers.get("token"))
+    if not user:
+        return "Error", 400
+    handlers.delete_picture_by_id_for_user(picture_id, user['id'])
+    return { "deleted": True }, 200
 
 
 @blueprint.route("/users/me/notifications", methods=['PATCH'])
@@ -75,7 +88,10 @@ def get_user_me():
     user = handlers.get_user_by_token(request.headers.get("token"))
     if not user:
         return "Error", 400
-    return user, 200
+    pictures = handlers.get_pictures_by_user_id(user['id'])
+    user_with_pictures = dict(user)
+    user_with_pictures['pictures'] = pictures
+    return user_with_pictures, 200
 
 @blueprint.route("/users/<user_id>", methods=['GET'])
 def get_user_by_id(user_id):
@@ -85,6 +101,7 @@ def get_user_by_id(user_id):
             return "Error", 400
         user = handlers.get_user_by_id(user_id)
         is_already_liked = handlers.is_user_liked(liked_user_id=user_id, connected_user_id=connected_user['id'])
+        pictures = handlers.get_pictures_by_user_id(user_id)
         return {
             "id": user['id'],
             "firstname": user['firstname'],
@@ -92,7 +109,7 @@ def get_user_by_id(user_id):
             "username": user['username'],
             "popularity": user['popularity'],
             "city": user['city'],
-            "picture_url": user['picture_url'],
+            "pictures": pictures,
             "isLiked": is_already_liked,
             "last_login": user['last_login'],
         }, 200
