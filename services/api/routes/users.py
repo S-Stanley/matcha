@@ -73,7 +73,18 @@ def get_user_list():
     user = handlers.get_user_by_token(request.headers.get("token"))
     if not user:
         return "Error", 400
-    return handlers.get_all_users(), 200
+    age_min = request.args.get("ageMin")
+    age_max = request.args.get("ageMax")
+    popularity_min = request.args.get("popularityMin")
+    popularity_max = request.args.get("popularityMax")
+    try:
+        age_min_int = int(age_min) if age_min is not None else None
+        age_max_int = int(age_max) if age_max is not None else None
+        popularity_min_int = int(popularity_min) if popularity_min is not None else None
+        popularity_max_int = int(popularity_max) if popularity_max is not None else None
+    except ValueError:
+        return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
+    return handlers.get_all_users(age_min_int, age_max_int, popularity_min_int, popularity_max_int), 200
 
 @blueprint.route("/users/password/change/confirm", methods=['POST'])
 def confirm_password_change():

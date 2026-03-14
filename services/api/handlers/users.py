@@ -185,10 +185,20 @@ def get_all_notifications_by_user_id(user_id):
             })
         return output
 
-def get_all_users():
+def get_all_users(age_min=None, age_max=None, popularity_min=None, popularity_max=None):
     with conn.cursor() as cur:
         cur.execute(
             sql.users.GET_ALL_USERS,
+            (
+                age_min,
+                age_min,
+                age_max,
+                age_max,
+                popularity_min,
+                popularity_min,
+                popularity_max,
+                popularity_max,
+            )
         )
         req = cur.fetchall()
         conn.commit()
