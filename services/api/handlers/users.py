@@ -56,7 +56,7 @@ def get_pictures_count_by_user_id(user_id):
         )
         res = cur.fetchone()
         conn.commit()
-        return res[0] if res else 0
+        return res[0] if res and len(res) > 0 else 0
 
 def create_picture(user_id, url):
     with conn.cursor() as cur:
@@ -86,15 +86,15 @@ def get_pictures_by_user_id(user_id):
         )
         rows = cur.fetchall()
         conn.commit()
-        return [
-            {
+        output = []
+        for row in rows:
+            output.append({
                 "id": row[0],
                 "user_id": row[1],
                 "url": row[2],
                 "created_at": row[3],
-            }
-            for row in rows
-        ]
+            })
+        return output
 
 def delete_picture_by_id_for_user(picture_id, user_id):
     with conn.cursor() as cur:
@@ -105,7 +105,9 @@ def delete_picture_by_id_for_user(picture_id, user_id):
                 user_id,
             )
         )
+        deleted_rows = cur.rowcount
         conn.commit()
+        return deleted_rows > 0
 
 def add_tag(user_id, tag):
     with conn.cursor() as cur:
@@ -377,7 +379,8 @@ def get_user_by_id(user_id):
         "username": user[3],
         "popularity": user[4],
         "city": user[5],
-        "last_login": user[6],
+        "age": user[6],
+        "last_login": user[7],
     }
 
 
@@ -450,6 +453,7 @@ def get_user_by_token(token):
                 "preference": found_user[8],
                 "popularity": found_user[9],
                 "city": found_user[10],
+                "age": found_user[11],
             }
     except Exception as e:
         print(e)
@@ -469,6 +473,7 @@ def patch_user(data, actual_user):
                     data['preference'] if 'preference' in data else None,
                     data['username'] if 'username' in data else actual_user['username'],
                     data['city'] if 'city' in data else actual_user['city'],
+                    int(data['age']) if 'age' in data else actual_user.get('age'),
                     actual_user['id']
                 )
             )
@@ -484,7 +489,8 @@ def patch_user(data, actual_user):
                 "preference": updated_user[6],
                 "username": updated_user[7],
                 "popularity": updated_user[8],
-                "city": updated_user[9]
+                "city": updated_user[9],
+                "age": updated_user[10],
             }
     except Exception as e:
         print(e)

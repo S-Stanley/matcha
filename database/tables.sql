@@ -25,6 +25,7 @@ CREATE TABLE "User" (
   confirm_code    VARCHAR(4)      DEFAULT FLOOR(1 + (RANDOM() * 10000))::TEXT,
   popularity      INTEGER         DEFAULT 0,
   city            TEXT            DEFAULT NULL,
+  age             INTEGER         DEFAULT NULL,
   created_at      timestamp       DEFAULT NOW()
 );
 

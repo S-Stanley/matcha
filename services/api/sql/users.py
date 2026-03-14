@@ -61,6 +61,7 @@ GET_USER_BY_ID = '''
         username,
         popularity,
         city,
+        age,
         (SELECT created_at FROM "Login" WHERE user_id="User".id ORDER BY created_at DESC LIMIT 1) as last_login
     FROM "User"
     WHERE id=%s
@@ -78,7 +79,8 @@ GET_USER_BY_TOKEN = '''
         gender,
         preference,
         popularity,
-        city
+        city,
+        age
     FROM "User"
     WHERE token=%s
 '''
@@ -119,9 +121,10 @@ PATCH_USER = '''
         gender=%s,
         preference=%s,
         username=%s,
-        city=%s
+        city=%s,
+        age=%s
     WHERE id=%s
-    RETURNING id, email, firstname, lastname, bio, gender, preference, username, popularity, city
+    RETURNING id, email, firstname, lastname, bio, gender, preference, username, popularity, city, age
 '''
 
 UPDATE_USER_PASSWORD='''

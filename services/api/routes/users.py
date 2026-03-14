@@ -109,6 +109,7 @@ def get_user_by_id(user_id):
             "username": user['username'],
             "popularity": user['popularity'],
             "city": user['city'],
+            "age": user['age'],
             "pictures": pictures,
             "isLiked": is_already_liked,
             "last_login": user['last_login'],
