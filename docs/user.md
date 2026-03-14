@@ -72,6 +72,14 @@ curl -X POST http://127.0.0.1:5000/users/password/change/confirm -d username=3 -
 curl "http://127.0.0.1:5000/users?ageMin=25&ageMax=35" -H token:5f737066-f767-4235-bbde-8765a7edff18
 ```
 
+```bash
+curl "http://127.0.0.1:5000/users?sortBy=age&orderBy=desc" -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
+
+
+* Filtres optionnels : `ageMin`, `ageMax`, `popularityMin`, `popularityMax` (entiers)
+* Tri optionnel : `sortBy` = `age` ou `popularity` ; `order` = `asc` ou `desc`. Ex. : `?sortBy=age&order=asc` ou `?sortBy=popularity&order=desc`. Par défaut : tri par popularité décroissante
+
 ## Get all users notifications
 
 ```bash

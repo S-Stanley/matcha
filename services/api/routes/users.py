@@ -68,6 +68,9 @@ def get_all_user_notifications():
         return "Error", 400
     return handlers.get_all_notifications_by_user_id(user['id']), 200
 
+SORT_BY_VALUES = ('age', 'popularity')
+ORDER_VALUES = ('asc', 'desc')
+
 @blueprint.route("/users", methods=['GET'])
 def get_user_list():
     user = handlers.get_user_by_token(request.headers.get("token"))
@@ -77,6 +80,8 @@ def get_user_list():
     age_max = request.args.get("ageMax")
     popularity_min = request.args.get("popularityMin")
     popularity_max = request.args.get("popularityMax")
+    sort_by = request.args.get("sortBy")
+    order_by = request.args.get("orderBy")
     try:
         age_min_int = int(age_min) if age_min is not None else None
         age_max_int = int(age_max) if age_max is not None else None
@@ -84,7 +89,18 @@ def get_user_list():
         popularity_max_int = int(popularity_max) if popularity_max is not None else None
     except ValueError:
         return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
-    return handlers.get_all_users(age_min_int, age_max_int, popularity_min_int, popularity_max_int), 200
+    if sort_by is not None and sort_by not in SORT_BY_VALUES:
+        return "Error, sortBy must be 'age' or 'popularity'", 400
+    if order_by is not None and order_by not in ORDER_VALUES:
+        return "Error, order must be 'asc' or 'desc'", 400
+    return handlers.get_all_users(
+        age_min_int,
+        age_max_int,
+        popularity_min_int,
+        popularity_max_int,
+        sort_by=sort_by,
+        order_by=order_by,
+    ), 200
 
 @blueprint.route("/users/password/change/confirm", methods=['POST'])
 def confirm_password_change():

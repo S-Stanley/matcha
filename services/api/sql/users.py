@@ -15,13 +15,13 @@ IS_BLOCKED = '''
 '''
 
 GET_ALL_USERS = '''
-    SELECT id, username, firstname, lastname, popularity
+    SELECT id, username, firstname, lastname, popularity, age
     FROM "User"
     WHERE (%s IS NULL OR age >= %s)
       AND (%s IS NULL OR age <= %s)
       AND (%s IS NULL OR popularity >= %s)
       AND (%s IS NULL OR popularity <= %s)
-    ORDER BY popularity DESC, age ASC NULLS LAST;
+    ORDER BY {} {}
 '''
 
 DELETE_CONFIRMATION_CODE='''
