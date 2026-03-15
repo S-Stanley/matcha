@@ -147,6 +147,7 @@ def is_tag_exist_for_user(user_id, tag):
         return True
 
 def get_all_users_nav(
+    user,
     age_min=None,
     age_max=None,
     popularity_min=None,
@@ -157,11 +158,13 @@ def get_all_users_nav(
     sort_by=None,
     order_by=None,
 ):
-    sort_by = (sort_by or 'popularity').lower()
-    order_by = (order_by or 'desc').lower()
+    sort_by = sort_by.lower() if sort_by else None
+    order_by = order_by.lower() if order_by else None
 
+    cityOfUser = user['city'] if user['city'] else ""
+    ageOfUser = user['age'] if user['age'] else "0"
     if sort_by not in ('age', 'popularity', 'city'):
-        sort_by = 'popularity'
+        sort_by = '(CASE WHEN "User".city = \'{}\' THEN 100 ELSE 0 END + "User".popularity * 10 + "User".age - {})'.format(cityOfUser, ageOfUser)
     if order_by not in ('asc', 'desc'):
         order_by = 'desc'
     with conn.cursor() as cur:

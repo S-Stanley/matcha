@@ -52,7 +52,7 @@ GET_ALL_USERS_NAV = '''
             )
           )
         AND "User".gender = ANY(%s::GENDER[])
-    ORDER BY {} {}
+    ORDER BY {} {} NULLS LAST
 '''
 
 DELETE_CONFIRMATION_CODE='''

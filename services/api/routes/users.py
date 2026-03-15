@@ -98,6 +98,7 @@ def get_user_nav():
     tags = None if tags_value is None else tags_value.split(",")
     filteredGender = utils.getGenderFilter(user['gender'], user['preference'])
     return handlers.get_all_users_nav(
+        user,
         age_min_int,
         age_max_int,
         popularity_min_int,
