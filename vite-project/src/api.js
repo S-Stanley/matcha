@@ -114,6 +114,16 @@ export async function patchProfilePicture(token, file) {
   return parseResponse(response);
 }
 
+export async function deleteProfilePicture(token, pictureId) {
+  const response = await fetch(`${API_URL}/users/picture/${pictureId}`, {
+    method: "DELETE",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
 export async function requestPasswordChange({ username, password }) {
   const payload = {
     username: username?.trim() || "",
@@ -164,8 +174,36 @@ export async function sendMatchMessage(token, matchId, content) {
   return parseResponse(response);
 }
 
-export async function getUsers(token) {
-  const response = await fetch(`${API_URL}/users`, {
+export async function getUsers(token, filters = null) {
+  const query = new URLSearchParams();
+  if (filters && typeof filters === "object") {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        query.append(key, String(value));
+      }
+    });
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  const response = await fetch(`${API_URL}/users${suffix}`, {
+    method: "GET",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function getUsersNav(token, filters = null) {
+  const query = new URLSearchParams();
+  if (filters && typeof filters === "object") {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        query.append(key, String(value));
+      }
+    });
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  const response = await fetch(`${API_URL}/users/nav${suffix}`, {
     method: "GET",
     headers: {
       token,
@@ -261,6 +299,26 @@ export async function markAllNotificationsAsRead(token) {
 export async function toggleUserTag(token, tagName) {
   const response = await fetch(`${API_URL}/users/tag/${encodeURIComponent(tagName)}`, {
     method: "PATCH",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function blockUser(token, blockedUserId) {
+  const response = await fetch(`${API_URL}/users/${blockedUserId}/block`, {
+    method: "POST",
+    headers: {
+      token,
+    },
+  });
+  return parseResponse(response);
+}
+
+export async function reportUser(token, reportedUserId) {
+  const response = await fetch(`${API_URL}/users/${reportedUserId}/report`, {
+    method: "POST",
     headers: {
       token,
     },

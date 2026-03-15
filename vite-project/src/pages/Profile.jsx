@@ -6,6 +6,7 @@ import {
   getLikesMe,
   getUserById,
   getViewsMe,
+  deleteProfilePicture,
   patchCurrentUser,
   patchProfilePicture,
   toggleUserTag,
@@ -61,35 +62,34 @@ function Profile() {
     bio: "",
     tags: [],
     popularity: 42,
+    age: null,
     location: {
       city: "",
       gpsEnabled: false,
     },
-    photos: [
-      { id: 1, url: null, isProfile: true },
-      { id: 2, url: null, isProfile: false },
-      { id: 3, url: null, isProfile: false },
-    ],
+    photos: [],
   });
   const [editForm, setEditForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     username: "",
+    age: "",
     city: "",
     bio: "",
     gender: "",
     sexualPreference: "",
   });
-  const [newPhotoFile, setNewPhotoFile] = useState(null);
+  const [newPhotoFiles, setNewPhotoFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [views, setViews] = useState([]);
   const [likes, setLikes] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [newPhotoPreview, setNewPhotoPreview] = useState("");
-  const profilePicture = profile.photos.find((p) => p.isProfile && p.url);
+  const [newPhotoPreviews, setNewPhotoPreviews] = useState([]);
+  const [deletingPictureId, setDeletingPictureId] = useState("");
+  const profilePicture = profile.photos[0];
   const getTagsStorageKey = (identity) => `profile_tags_${identity || "me"}`;
 
   const resolvePictureUrl = (url) => {
@@ -101,6 +101,13 @@ function Profile() {
   };
 
   const hydrateProfile = (me) => {
+    const backendPictures = Array.isArray(me.pictures)
+      ? me.pictures.map((pic) => ({
+          id: pic?.id,
+          url: pic?.url,
+          created_at: pic?.created_at,
+        })).filter((pic) => pic.url)
+      : [];
     const hydrated = {
       firstName: me.firstname || "",
       lastName: me.lastname || "",
@@ -120,15 +127,16 @@ function Profile() {
         }
       })(),
       popularity: me.popularity || 0,
+      age: me.age ?? null,
       location: {
         city: me.city || "Non renseignée",
         gpsEnabled: false,
       },
-      photos: [
-        { id: 1, url: me.picture_url || me.pictureUrl || null, isProfile: true },
-        { id: 2, url: null, isProfile: false },
-        { id: 3, url: null, isProfile: false },
-      ],
+      photos: backendPictures.length > 0
+        ? backendPictures
+        : (me.picture_url || me.pictureUrl
+          ? [{ id: "legacy", url: me.picture_url || me.pictureUrl }]
+          : []),
     };
     setProfile(hydrated);
     setEditForm({
@@ -136,6 +144,7 @@ function Profile() {
       lastName: hydrated.lastName,
       email: hydrated.email,
       username: hydrated.username,
+      age: me.age ?? "",
       city: me.city || "",
       bio: hydrated.bio,
       gender: hydrated.gender === "Non renseigné" ? "" : hydrated.gender,
@@ -222,14 +231,14 @@ function Profile() {
   }, []);
 
   useEffect(() => {
-    if (!newPhotoFile) {
-      setNewPhotoPreview("");
+    if (newPhotoFiles.length === 0) {
+      setNewPhotoPreviews([]);
       return;
     }
-    const objectUrl = URL.createObjectURL(newPhotoFile);
-    setNewPhotoPreview(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [newPhotoFile]);
+    const objectUrls = newPhotoFiles.map((file) => URL.createObjectURL(file));
+    setNewPhotoPreviews(objectUrls);
+    return () => objectUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [newPhotoFiles]);
 
   const requestGPSLocation = () => {
     if (!navigator.geolocation) {
@@ -306,6 +315,44 @@ function Profile() {
     setEditForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleAddPhotos = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const remaining = 5 - profile.photos.length - newPhotoFiles.length;
+    if (remaining <= 0) {
+      setError("Maximum 5 photos.");
+      return;
+    }
+    if (files.length > remaining) {
+      setError(`Tu peux ajouter encore ${remaining} photo(s) maximum.`);
+      return;
+    }
+    setError("");
+    setNewPhotoFiles((prev) => [...prev, ...files]);
+  };
+
+  const removePendingPhoto = (indexToRemove) => {
+    setNewPhotoFiles((prev) => prev.filter((_, i) => i !== indexToRemove));
+  };
+
+  const deleteExistingPhoto = async (pictureId) => {
+    const token = localStorage.getItem("token");
+    if (!token || !pictureId) return;
+    setDeletingPictureId(String(pictureId));
+    setError("");
+    try {
+      await deleteProfilePicture(token, pictureId);
+      setProfile((prev) => ({
+        ...prev,
+        photos: prev.photos.filter((p) => String(p.id) !== String(pictureId)),
+      }));
+    } catch (err) {
+      setError(err?.message || "Impossible de supprimer la photo.");
+    } finally {
+      setDeletingPictureId("");
+    }
+  };
+
   const handleToggleTag = async (tag) => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -325,12 +372,13 @@ function Profile() {
 
   const cancelEdit = () => {
     setIsEditing(false);
-    setNewPhotoFile(null);
+    setNewPhotoFiles([]);
     setEditForm({
       firstName: profile.firstName,
       lastName: profile.lastName,
       email: profile.email,
       username: profile.username,
+      age: profile.age ?? "",
       city: profile.location.city === "Non renseignée" ? "" : profile.location.city,
       bio: profile.bio,
       gender: profile.gender === "Non renseigné" ? "" : profile.gender,
@@ -353,7 +401,7 @@ function Profile() {
     setError("");
 
     try {
-      await patchCurrentUser(token, {
+      const payload = {
         email: editForm.email.trim(),
         firstname: editForm.firstName.trim(),
         lastname: editForm.lastName.trim(),
@@ -362,16 +410,26 @@ function Profile() {
         bio: editForm.bio,
         gender: GENDER_TO_API[editForm.gender],
         preference: PREFERENCE_TO_API[editForm.sexualPreference],
-      });
+      };
+      const normalizedAge = String(editForm.age ?? "").trim();
+      if (normalizedAge !== "") {
+        payload.age = normalizedAge;
+      }
 
-      if (newPhotoFile) {
-        await patchProfilePicture(token, newPhotoFile);
+      await patchCurrentUser(token, payload);
+
+      if (newPhotoFiles.length > 0) {
+        for (const file of newPhotoFiles) {
+          // Backend currently accepts one file per request.
+          // We send them sequentially to create up to 5 pictures.
+          await patchProfilePicture(token, file);
+        }
       }
 
       const me = await getCurrentUser(token);
       hydrateProfile(me);
       setIsEditing(false);
-      setNewPhotoFile(null);
+      setNewPhotoFiles([]);
     } catch (err) {
       setError(err?.message || "Impossible de sauvegarder le profil.");
     } finally {
@@ -388,22 +446,48 @@ function Profile() {
           <div className="myprofile">
             <div className="photo-container">
               <div className="myprofile-card-picture">
-                {newPhotoFile ? (
-                  <img src={newPhotoPreview} alt="Nouvelle photo de profil" />
-                ) : profilePicture ? (
+                {profilePicture ? (
                   <img src={resolvePictureUrl(profilePicture.url)} alt="Photo de profil" />
+                ) : newPhotoPreviews[0] ? (
+                  <img src={newPhotoPreviews[0]} alt="Nouvelle photo de profil" />
                 ) : (
                   <p>PHOTO DE PROFIL</p>
                 )}
               </div>
+              <div className="profile-photos-grid">
+                {profile.photos.map((photo) => (
+                  <div key={String(photo.id)} className="profile-photo-thumb">
+                    <img src={resolvePictureUrl(photo.url)} alt="Photo" />
+                    {isEditing && (
+                      <button
+                        type="button"
+                        className="profile-photo-delete"
+                        onClick={() => deleteExistingPhoto(photo.id)}
+                        disabled={deletingPictureId === String(photo.id)}
+                      >
+                        {deletingPictureId === String(photo.id) ? "..." : "×"}
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {isEditing &&
+                  newPhotoPreviews.map((src, i) => (
+                    <div key={`new-${i}`} className="profile-photo-thumb pending">
+                      <img src={src} alt="Nouvelle photo" />
+                      <button
+                        type="button"
+                        className="profile-photo-delete"
+                        onClick={() => removePendingPhoto(i)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+              </div>
               {isEditing && (
                 <label className="profile-photo-upload">
-                  Changer la photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setNewPhotoFile(e.target.files?.[0] || null)}
-                  />
+                  Ajouter des photos ({profile.photos.length + newPhotoFiles.length}/5)
+                  <input type="file" multiple accept="image/*" onChange={handleAddPhotos} />
                 </label>
               )}
             </div>
@@ -427,6 +511,9 @@ function Profile() {
                   </p>
                   <p>
                     <strong>Username :</strong> @{profile.username || "unknown"}
+                  </p>
+                  <p>
+                    <strong>Âge :</strong> {profile.age ?? "Non renseigné"}
                   </p>
                   <p>
                     <strong>Localisation :</strong> {profile.location.city}
@@ -485,6 +572,16 @@ function Profile() {
                       <input
                         value={editForm.username}
                         onChange={(e) => handleEditChange("username", e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      Âge
+                      <input
+                        type="number"
+                        min={18}
+                        max={120}
+                        value={editForm.age}
+                        onChange={(e) => handleEditChange("age", e.target.value)}
                       />
                     </label>
                     <label>

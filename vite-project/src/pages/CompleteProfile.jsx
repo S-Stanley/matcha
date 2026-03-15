@@ -14,7 +14,7 @@ const API_TO_GENDER = {
   MALE: "Homme",
   FEMALE: "Femme",
   OTHERS: "Autre",
-  "DO NOT PRONONCE": "Autre",
+  "DO NOT PRONONCE": "Ne se prononce pas",
 };
 
 const PREFERENCE_TO_API = {
@@ -40,20 +40,21 @@ function CompleteProfile() {
   const [answers, setAnswers] = useState({
     gender: "",
     preference: "",
+    age: "",
     bio: "",
     tags: [],
     photos: [],
   });
-  const [photoFile, setPhotoFile] = useState(null);
+  const [photoFiles, setPhotoFiles] = useState([]);
 
-  // --- LISTE DES ÉTAPES ---
   const steps = [
     { question: "Quel est votre genre ?", key: "gender", type: "choices", options: ["Homme", "Femme", "Autre", "Ne se prononce pas"] },
     { question: "Quel genre recherchez-vous ?", key: "preference", type: "choices", options: ["Homme", "Femme", "Les deux"] },
+    { question: "Quel est votre âge ?", key: "age", type: "number" },
     { question: "Dites-en plus sur vous", key: "bio", type: "textarea" },
     { question: "Choisissez vos tags", key: "tags", type: "multi", options: ["sport", "cinema", "musique", "voyage", "cuisine", "jeux", "lecture", "tech"] },
     { question: "Ajoutez vos photos", key: "photos", type: "photos" },
-    { question: "Résumé de votre profil", key: "summary", type: "summary" } // <-- NOUVELLE ÉTAPE
+    { question: "Résumé de votre profil", key: "summary", type: "summary" },
   ];
 
   const current = steps[step];
@@ -76,11 +77,12 @@ function CompleteProfile() {
         });
         setAnswers((prev) => ({
           ...prev,
+          age: me.age ? String(me.age) : "",
           bio: me.bio || "",
           gender: API_TO_GENDER[me.gender] || "",
           preference: API_TO_PREFERENCE[me.preference] || "",
         }));
-      } catch (err) {
+      } catch (_) {
         setError("Impossible de charger ton profil. Reconnecte-toi.");
       } finally {
         setLoadingUser(false);
@@ -90,55 +92,50 @@ function CompleteProfile() {
     bootstrap();
   }, [navigate]);
 
-  // --- SELECT SIMPLE ---
   const handleSelect = (value) => {
     if (error) setError("");
-    setAnswers({ ...answers, [current.key]: value });
+    setAnswers((prev) => ({ ...prev, [current.key]: value }));
   };
 
-  // --- SELECT MULTIPLE ---
   const handleMultiSelect = (value) => {
     if (error) setError("");
-    const arr = answers[current.key];
-    const updated = arr.includes(value)
-      ? arr.filter((v) => v !== value)
-      : [...arr, value];
-    setAnswers({ ...answers, [current.key]: updated });
+    setAnswers((prev) => {
+      const arr = prev[current.key];
+      const updated = arr.includes(value)
+        ? arr.filter((v) => v !== value)
+        : [...arr, value];
+      return { ...prev, [current.key]: updated };
+    });
   };
 
-  // --- TEXTAREA ---
   const handleChange = (e) => {
     if (error) setError("");
-    setAnswers({ ...answers, [current.key]: e.target.value });
+    setAnswers((prev) => ({ ...prev, [current.key]: e.target.value }));
   };
 
-  // --- UPLOAD PHOTO UNIQUE ---
   const handlePhotoUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const preview = URL.createObjectURL(file);
-    setAnswers({ ...answers, photos: [preview] });
-    setPhotoFile(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    if (answers.photos.length + files.length > 5) {
+      alert("Maximum 5 photos.");
+      return;
+    }
+    const previews = files.map((f) => URL.createObjectURL(f));
+    setAnswers((prev) => ({ ...prev, photos: [...prev.photos, ...previews] }));
+    setPhotoFiles((prev) => [...prev, ...files]);
   };
 
-  const removePhoto = () => {
-    setAnswers({
-      ...answers,
-      photos: []
-    });
-    setPhotoFile(null);
+  const removePhoto = (indexToRemove) => {
+    setAnswers((prev) => ({
+      ...prev,
+      photos: prev.photos.filter((_, index) => index !== indexToRemove),
+    }));
+    setPhotoFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  // --- NAVIGATION ---
-  const nextStep = () => {
-    setStep(step + 1);
-  };
+  const nextStep = () => setStep((prev) => prev + 1);
+  const prevStep = () => setStep((prev) => prev - 1);
 
-  const prevStep = () => {
-    setStep(step - 1);
-  };
-
-  // --- CONFIRMATION FINALE ---
   const confirmProfile = async () => {
     const token = localStorage.getItem("token");
     if (!token || !userBase) {
@@ -154,16 +151,23 @@ function CompleteProfile() {
         firstname: userBase.firstname,
         lastname: userBase.lastname,
         username: userBase.username,
+        age: String(answers.age).trim(),
         bio: answers.bio,
         gender: GENDER_TO_API[answers.gender],
         preference: PREFERENCE_TO_API[answers.preference],
       });
+
       if (answers.tags.length > 0) {
         await Promise.all(answers.tags.map((tag) => toggleUserTag(token, tag)));
       }
-      if (photoFile) {
-        await patchProfilePicture(token, photoFile);
+
+      if (photoFiles.length > 0) {
+        for (const file of photoFiles) {
+          // Backend accepts one file per request and handles max 5 server-side.
+          await patchProfilePicture(token, file);
+        }
       }
+
       const tagsKey = `profile_tags_${userBase.username || "me"}`;
       localStorage.setItem(tagsKey, JSON.stringify(answers.tags));
       localStorage.removeItem("profile_tags_me");
@@ -188,24 +192,23 @@ function CompleteProfile() {
   return (
     <div className="completeprofile-container">
       <div className="completeprofile-page">
-
-        {/* TITLE */}
         <h1 className="completeprofile-title">{current.question}</h1>
         {error && <p style={{ color: "red", marginBottom: 12 }}>{error}</p>}
 
-        {/* --- RÉSUMÉ FINAL --- */}
         {current.type === "summary" && (
           <div className="summary-box">
-
             <div className="summary-info1">
               <div className="summary-item">
                 <h3>Genre</h3>
                 <p>{answers.gender}</p>
               </div>
-
               <div className="summary-item">
                 <h3>Préférence</h3>
                 <p>{answers.preference}</p>
+              </div>
+              <div className="summary-item">
+                <h3>Âge</h3>
+                <p>{answers.age}</p>
               </div>
             </div>
 
@@ -223,12 +226,11 @@ function CompleteProfile() {
               </div>
             </div>
 
-
             <div className="summary-item">
               <h3>Photos</h3>
               <div className="summary-photo-grid">
                 {answers.photos.map((src, i) => (
-                  <img key={i} src={src} alt="" className="summary-photo" />
+                  <img key={`${src}-${i}`} src={src} alt="" className="summary-photo" />
                 ))}
               </div>
             </div>
@@ -239,7 +241,6 @@ function CompleteProfile() {
           </div>
         )}
 
-        {/* --- CHOICES --- */}
         {current.type === "choices" && (
           <div className="choices-container">
             {current.options.map((op) => (
@@ -254,7 +255,6 @@ function CompleteProfile() {
           </div>
         )}
 
-        {/* --- MULTI --- */}
         {current.type === "multi" && (
           <div className="choices-container">
             {current.options.map((op) => (
@@ -269,7 +269,6 @@ function CompleteProfile() {
           </div>
         )}
 
-        {/* --- TEXTAREA --- */}
         {current.type === "textarea" && (
           <textarea
             value={answers[current.key]}
@@ -278,24 +277,34 @@ function CompleteProfile() {
           />
         )}
 
-        {/* --- PHOTOS --- */}
+        {current.type === "number" && (
+          <input
+            type="number"
+            min={18}
+            max={120}
+            value={answers[current.key]}
+            onChange={handleChange}
+            className="step-input"
+          />
+        )}
+
         {current.type === "photos" && (
           <>
             <label className="upload-box">
               + Ajouter une photo
-              <input type="file" accept="image/*" onChange={handlePhotoUpload} />
+              <input type="file" multiple accept="image/*" onChange={handlePhotoUpload} />
             </label>
 
             <div className="photo-preview-grid">
-              {answers.photos.map((src) => (
-                <div key={src} className="photo-preview">
+              {answers.photos.map((src, i) => (
+                <div key={`${src}-${i}`} className="photo-preview">
                   <img src={src} alt="" />
                   <button
                     type="button"
                     className="remove-photo"
                     aria-label="Supprimer la photo"
                     title="Supprimer la photo"
-                    onClick={removePhoto}
+                    onClick={() => removePhoto(i)}
                   >
                     ×
                   </button>
@@ -305,7 +314,6 @@ function CompleteProfile() {
           </>
         )}
 
-        {/* --- BUTTONS --- */}
         {current.type !== "summary" && (
           <div className="step-buttons">
             {step > 0 && <button className="prev-button" onClick={prevStep}>Retour</button>}
@@ -317,6 +325,8 @@ function CompleteProfile() {
                   ? answers[current.key].length === 0
                   : current.type === "photos"
                     ? answers.photos.length === 0
+                    : current.type === "number"
+                      ? !answers[current.key] || Number(answers[current.key]) < 18
                     : !answers[current.key]
               }
             >
@@ -324,7 +334,6 @@ function CompleteProfile() {
             </button>
           </div>
         )}
-
       </div>
     </div>
   );

@@ -18,10 +18,8 @@
 }
 
 .profile {
-  width: min(980px, 95vw);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  width: min(560px, 95vw);
+  display: block;
 }
 
 .photo-container {
@@ -42,38 +40,54 @@
   gap: 6px;
   font-size: 1.3rem;
   font-weight: 600;
+  position: relative;
+  padding-top: 44px;
+  overflow: hidden;
 }
 
 .match-card-picture small {
   color: #666;
+  position: relative;
+  z-index: 2;
+}
+
+.match-card-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.match-card-picture::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.05));
+  z-index: 1;
+}
+
+.match-name {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  margin: 0;
+}
+
+.match-card-picture small {
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .liked-me-pill {
-  margin-top: 8px;
   padding: 6px 10px;
   border-radius: 999px;
   background: rgba(31, 157, 85, 0.15);
   color: #1f9d55;
   font-size: 0.82rem;
   font-weight: 700;
-}
-
-.match-card-description {
-  min-height: 420px;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  padding: 24px;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.desc-title {
-  margin: 0;
-  color: #777;
-  font-size: 0.9rem;
 }
 
 .match-actions {
@@ -83,17 +97,19 @@
 }
 
 .icon-btn {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+  width: 104px;
+  height: 78px;
+  border-radius: 16px;
   border: none;
-  font-size: 1.8rem;
   cursor: pointer;
   font-weight: bold;
   display: flex;
+  flex-direction: column;
+  gap: 2px;
   justify-content: center;
   align-items: center;
   transition: transform 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
 .icon-btn:disabled {
@@ -111,6 +127,59 @@
   color: #fff;
 }
 
+.icon-symbol {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.icon-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.match-view-profile-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.match-status-row {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.connected-pill,
+.already-liked-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.connected-pill {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+}
+
+.already-liked-pill {
+  background: rgba(170, 24, 58, 0.12);
+  color: rgb(170, 24, 58);
+}
+
 .to-messages-btn {
   border: none;
   border-radius: 12px;
@@ -121,13 +190,64 @@
   cursor: pointer;
 }
 
+.location-required-box {
+  width: min(620px, 95vw);
+  background: #fff;
+  border: 1px solid #ececf1;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.location-required-box h3 {
+  margin: 0 0 10px;
+}
+
+.location-required-box p {
+  margin: 0 0 16px;
+  color: #4b5563;
+}
+
 @media (max-width: 900px) {
-  .profile {
-    grid-template-columns: 1fr;
+  .match-content {
+    justify-content: flex-start;
+    padding: 12px;
+    gap: 10px;
   }
 
-  .match-card-picture,
-  .match-card-description {
-    min-height: 300px;
+  .profile {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .match-card-picture {
+    min-height: 250px;
+  }
+
+  .match-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #ececf1;
+    border-radius: 14px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .icon-btn {
+    flex: 1;
+    max-width: 180px;
+    height: 68px;
+    border-radius: 14px;
+  }
+
+  .icon-symbol {
+    font-size: 1.35rem;
+  }
+
+  .icon-label {
+    font-size: 0.78rem;
   }
 }

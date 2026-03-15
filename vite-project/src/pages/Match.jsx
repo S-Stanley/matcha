@@ -1,7 +1,7 @@
 import "../CSS/Match.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createLike, createView, getUsers } from "../api";
+import { createLike, createView, deleteLike, getCurrentUser, getMatches, getUserById, getUsersNav } from "../api";
 
 function isAlreadyLiked(user) {
   return Boolean(
@@ -34,6 +34,8 @@ function Match() {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [locationBlocked, setLocationBlocked] = useState(false);
+  const [currentPictureUrl, setCurrentPictureUrl] = useState("");
 
   const currentUserId = localStorage.getItem("userId");
   const current = profiles[index];
@@ -47,13 +49,27 @@ function Match() {
       }
 
       try {
-        const data = await getUsers(token);
+        const me = await getCurrentUser(token);
+        const hasLocation = Boolean(me?.city && String(me.city).trim());
+        if (!hasLocation) {
+          setLocationBlocked(true);
+          return;
+        }
+
+        const [data, matches] = await Promise.all([
+          getUsersNav(token),
+          getMatches(token).catch(() => []),
+        ]);
+        const connectedIds = (Array.isArray(matches) ? matches : [])
+          .map((m) => String(m?.user_id || ""))
+          .filter(Boolean);
         const list = (Array.isArray(data) ? data : [])
           .filter((user) => String(user.id) !== String(currentUserId))
           .map((user) => ({
             ...user,
             liked: isAlreadyLiked(user),
             likedMe: hasLikedMe(user),
+            connected: connectedIds.includes(String(user.id)),
           }));
         setProfiles(list);
         if (list.length > 0) {
@@ -78,10 +94,49 @@ function Match() {
     sendView();
   }, [current]);
 
+  useEffect(() => {
+    const loadCurrentPicture = async () => {
+      const token = localStorage.getItem("token");
+      if (!token || !current?.id) {
+        setCurrentPictureUrl("");
+        return;
+      }
+      try {
+        const data = await getUserById(token, current.id);
+        const firstPictureUrl = Array.isArray(data?.pictures) ? data.pictures?.[0]?.url : "";
+        const raw = firstPictureUrl || data?.picture_url || data?.pictureUrl || "";
+        if (!raw) {
+          setCurrentPictureUrl("");
+          return;
+        }
+        if (raw.startsWith("http://") || raw.startsWith("https://")) {
+          setCurrentPictureUrl(raw);
+        } else {
+          setCurrentPictureUrl(`http://127.0.0.1:5000${raw.startsWith("/") ? "" : "/"}${raw}`);
+        }
+      } catch (_) {
+        setCurrentPictureUrl("");
+      }
+    };
+
+    loadCurrentPicture();
+  }, [current?.id]);
+
   const goNext = () => {
     setFeedback("");
-    if (index + 1 >= profiles.length) return;
-    setIndex((prev) => prev + 1);
+    setProfiles((prev) => {
+      if (prev.length === 0) return prev;
+      const currentIdx = Math.min(index, prev.length - 1);
+      const nextProfiles = [
+        ...prev.slice(0, currentIdx),
+        ...prev.slice(currentIdx + 1),
+      ];
+      const nextIndex = nextProfiles.length === 0
+        ? 0
+        : Math.min(currentIdx, nextProfiles.length - 1);
+      setIndex(nextIndex);
+      return nextProfiles;
+    });
   };
 
   const handlePass = () => {
@@ -89,7 +144,7 @@ function Match() {
     goNext();
   };
 
-  const handleLike = async () => {
+  const handlePrimaryAction = async () => {
     if (actionLoading || !current) return;
     const token = localStorage.getItem("token");
     if (!token) {
@@ -100,15 +155,20 @@ function Match() {
     setError("");
     setFeedback("");
     try {
-      const res = await createLike(token, current.id);
-      if (res?.is_new_match && res?.match?.id) {
-        setFeedback("Nouveau match. Va dans Messages pour discuter.");
+      if (current.connected || current.liked) {
+        await deleteLike(token, current.id);
+        setFeedback(current.connected ? "Déconnecté." : "Like retiré.");
       } else {
-        setFeedback("Like envoyé.");
+        const res = await createLike(token, current.id);
+        if (res?.is_new_match && res?.match?.id) {
+          setFeedback("Connectés.");
+        } else {
+          setFeedback("Like envoyé.");
+        }
       }
       goNext();
     } catch (err) {
-      setError(err?.message || "Impossible d'envoyer le like.");
+      setError(err?.message || "Action impossible.");
     } finally {
       setActionLoading(false);
     }
@@ -122,44 +182,67 @@ function Match() {
         {!loading && error && <p style={{ color: "red" }}>{error}</p>}
         {feedback && <p style={{ color: "green" }}>{feedback}</p>}
         {!loading && !current && !error && <p>Plus de profils pour le moment.</p>}
+        {!loading && locationBlocked && (
+          <div className="location-required-box">
+            <h3>Localisation requise</h3>
+            <p>
+              Ajoute une adresse ou active le GPS dans ton profil pour accéder à Match.
+            </p>
+            <button className="to-messages-btn" onClick={() => navigate("/profile")}>
+              Aller au profil
+            </button>
+          </div>
+        )}
 
-        {!loading && current && (
+        {!loading && !locationBlocked && current && (
           <div className="profile">
             <div className="photo-container">
               <div className="match-card-picture">
-                <p>
+                {currentPictureUrl && (
+                  <img
+                    src={currentPictureUrl}
+                    alt="Photo de profil"
+                    className="match-card-image"
+                  />
+                )}
+                <button
+                  type="button"
+                  className="match-view-profile-btn"
+                  onClick={() =>
+                    navigate(`/profile/${current.id}`, {
+                      state: { from: "match" },
+                    })
+                  }
+                >
+                  Voir profil
+                </button>
+                <p className="match-name">
                   {current.firstname || ""} {current.lastname || ""}
                 </p>
                 <small>@{current.username}</small>
-                {current.likedMe && <span className="liked-me-pill">T'a liké</span>}
+                <small>Âge: {current.age ?? "N/A"}</small>
+                <small>Popularité: {current.popularity ?? 0}</small>
+                <div className="match-status-row">
+                  {current.likedMe && <span className="liked-me-pill">Vous a liké</span>}
+                  {current.connected && <span className="connected-pill">Connectés</span>}
+                  {!current.connected && current.liked && (
+                    <span className="already-liked-pill">Déjà liké</span>
+                  )}
+                </div>
               </div>
 
               <div className="match-actions">
                 <button className="icon-btn pass" onClick={handlePass} disabled={actionLoading}>
-                  ✖
+                  <span className="icon-symbol">✖</span>
+                  <span className="icon-label">Passer</span>
                 </button>
-                <button className="icon-btn match" onClick={handleLike} disabled={actionLoading}>
-                  ❤
+                <button className="icon-btn match" onClick={handlePrimaryAction} disabled={actionLoading}>
+                  <span className="icon-symbol">{current.connected || current.liked ? "↺" : "❤"}</span>
+                  <span className="icon-label">
+                    {current.connected ? "Déconnecter" : current.liked ? "Unliker" : "Liker"}
+                  </span>
                 </button>
               </div>
-            </div>
-
-            <div className="match-card-description">
-              <div>
-                <p className="desc-title">Pseudo</p>
-                <p>@{current.username}</p>
-              </div>
-              <div>
-                <p className="desc-title">Prénom</p>
-                <p>{current.firstname || "N/A"}</p>
-              </div>
-              <div>
-                <p className="desc-title">Nom</p>
-                <p>{current.lastname || "N/A"}</p>
-              </div>
-              <button className="to-messages-btn" onClick={() => navigate("/message")}>
-                Voir mes matchs/messages
-              </button>
             </div>
           </div>
         )}

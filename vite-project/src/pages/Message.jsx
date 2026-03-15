@@ -1,7 +1,7 @@
 import "../CSS/Message.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { deleteLike, getLikesMe, getMatchMessages, getMatches, getUserById, getUsers, sendMatchMessage } from "../api";
+import { blockUser, deleteLike, getMatchMessages, getMatches, getUserById, getUsers, sendMatchMessage } from "../api";
 
 function normalizeMessage(item) {
   if (Array.isArray(item)) {
@@ -22,23 +22,6 @@ function normalizeMessage(item) {
   };
 }
 
-function extractLikedById(entry) {
-  if (!entry) return null;
-  if (Array.isArray(entry)) {
-    if (entry.length >= 2) return entry[1];
-    if (entry.length === 1) {
-      const raw = String(entry[0]);
-      const match = raw.match(/\(([^,]+),([^)]+)\)/);
-      return match?.[2] || null;
-    }
-  }
-  if (typeof entry === "string") {
-    const match = entry.match(/\(([^,]+),([^)]+)\)/);
-    return match?.[2] || null;
-  }
-  return entry?.liked_by || entry?.likedBy || null;
-}
-
 function Message() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,7 +34,7 @@ function Message() {
   const [sending, setSending] = useState(false);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [deletingLikeId, setDeletingLikeId] = useState("");
-  const [likes, setLikes] = useState([]);
+  const [sentLikes, setSentLikes] = useState([]);
   const [error, setError] = useState("");
   const [isLive, setIsLive] = useState(true);
   const messagesContainerRef = useRef(null);
@@ -68,6 +51,8 @@ function Message() {
     );
 
   useEffect(() => {
+    let refreshTimer = null;
+
     const loadMatches = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -95,41 +80,72 @@ function Message() {
     };
 
     loadMatches();
-  }, [navigate, searchParams, setSearchParams]);
 
-  useEffect(() => {
-    const loadLikes = async () => {
+    refreshTimer = setInterval(async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
-      setLoadingLikes(true);
       try {
-        const [raw, users] = await Promise.all([
-          getLikesMe(token),
-          getUsers(token).catch(() => []),
-        ]);
-        const usersMap = {};
-        (Array.isArray(users) ? users : []).forEach((u) => {
-          usersMap[String(u.id)] = u;
+        const data = await getMatches(token);
+        const list = Array.isArray(data) ? data : [];
+        setMatches(list);
+
+        setSelectedMatchId((currentSelected) => {
+          const hasCurrent = list.some(
+            (m) => String(m.match_id || m.id) === String(currentSelected)
+          );
+          if (hasCurrent) return currentSelected;
+
+          const queryMatchId = searchParams.get("matchId");
+          const hasQuery = queryMatchId && list.some(
+            (m) => String(m.match_id || m.id) === String(queryMatchId)
+          );
+          if (hasQuery) return String(queryMatchId);
+
+          const firstMatchId = list[0] ? String(list[0].match_id || list[0].id) : "";
+          if (firstMatchId) {
+            setSearchParams({ matchId: firstMatchId });
+          } else {
+            setSearchParams({});
+            setMessages([]);
+          }
+          return firstMatchId;
         });
-        const likerIds = (Array.isArray(raw) ? raw : [])
-          .map(extractLikedById)
-          .filter(Boolean);
-        if (likerIds.length === 0) {
-          setLikes([]);
-          return;
-        }
-        const likeUsers = await Promise.all(
-          likerIds.map((id) =>
-            getUserById(token, id).catch(() => usersMap[String(id)] || { id, username: "unknown", firstname: "", lastname: "" })
-          )
-        );
-        setLikes(likeUsers);
       } catch (_) {
-        setLikes([]);
-      } finally {
-        setLoadingLikes(false);
+        // Silent refresh failure; existing list remains displayed.
       }
+    }, 3000);
+
+    return () => {
+      if (refreshTimer) clearInterval(refreshTimer);
     };
+  }, [navigate, searchParams, setSearchParams]);
+
+  const loadLikes = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    setLoadingLikes(true);
+    try {
+      const users = await getUsers(token).catch(() => []);
+      const allUsers = Array.isArray(users) ? users : [];
+      if (allUsers.length === 0) {
+        setSentLikes([]);
+        return;
+      }
+      const details = await Promise.all(
+        allUsers.map((u) =>
+          getUserById(token, u.id).catch(() => ({ ...u, isLiked: false }))
+        )
+      );
+      const sentLikes = details.filter((u) => Boolean(u?.isLiked));
+      setSentLikes(sentLikes);
+    } catch (_) {
+      setSentLikes([]);
+    } finally {
+      setLoadingLikes(false);
+    }
+  };
+
+  useEffect(() => {
     loadLikes();
   }, []);
 
@@ -244,8 +260,11 @@ function Message() {
     setDeletingLikeId(String(likedUserId));
     setError("");
     try {
-      await deleteLike(token, likedUserId);
-      setLikes((prev) => prev.filter((u) => String(u.id) !== String(likedUserId)));
+      setSentLikes((prev) => prev.filter((u) => String(u.id) !== String(likedUserId)));
+
+      await deleteLike(token, likedUserId).catch(async () => {
+        await blockUser(token, likedUserId).catch(() => null);
+      });
       setMatches((prev) => {
         const nextMatches = prev.filter(
           (m) => getMatchPeerUserId(m) !== String(likedUserId)
@@ -267,8 +286,9 @@ function Message() {
         }
         return nextMatches;
       });
+      await loadLikes();
     } catch (err) {
-      setError(err?.message || "Impossible de supprimer ce like.");
+      setError(err?.message || "Impossible de supprimer ce profil.");
     } finally {
       setDeletingLikeId("");
     }
@@ -289,48 +309,52 @@ function Message() {
             <h3>Conversations</h3>
             {loadingMatches && <p>Chargement...</p>}
             {!loadingMatches && matches.length === 0 && <p>Aucun match.</p>}
-            {!loadingMatches &&
-              matches.map((conv) => (
-                <div
-                  key={conv.match_id || conv.id}
-                  className={`conversation-item ${String(conv.match_id || conv.id) === String(selectedMatchId) ? "active" : ""}`}
-                  onClick={() => openConversation(conv.match_id || conv.id)}
-                >
-                  <div className="conversation-avatar">
-                    {(conv.firstname?.[0] || conv.username?.[0] || "?").toUpperCase()}
-                  </div>
+            <div className="conversation-list">
+              {!loadingMatches &&
+                matches.map((conv) => (
+                  <div
+                    key={conv.match_id || conv.id}
+                    className={`conversation-item ${String(conv.match_id || conv.id) === String(selectedMatchId) ? "active" : ""}`}
+                    onClick={() => openConversation(conv.match_id || conv.id)}
+                  >
+                    <div className="conversation-avatar">
+                      {(conv.firstname?.[0] || conv.username?.[0] || "?").toUpperCase()}
+                    </div>
 
-                  <div className="conversation-info">
-                    <p className="conversation-name">
-                      {conv.firstname || ""} {conv.lastname || ""}
-                    </p>
-                    <p className="conversation-last">@{conv.username || "unknown"}</p>
-                  </div>
-                </div>
-              ))}
-
-            <div className="likes-section">
-              <h4>Mes likes</h4>
-              {loadingLikes && <p>Chargement...</p>}
-              {!loadingLikes && likes.length === 0 && <p>Aucun like.</p>}
-              {!loadingLikes &&
-                likes.map((u) => (
-                  <div key={u.id} className="like-row">
-                    <span>
-                      {(u.firstname || u.lastname)
-                        ? `${u.firstname} ${u.lastname}`.trim()
-                        : `@${u.username || "unknown"}`}
-                    </span>
-                    <button
-                      type="button"
-                      className="like-delete-btn"
-                      onClick={() => handleDeleteLike(u.id)}
-                      disabled={deletingLikeId === String(u.id)}
-                    >
-                      {deletingLikeId === String(u.id) ? "..." : "Supprimer"}
-                    </button>
+                    <div className="conversation-info">
+                      <p className="conversation-name">
+                        {conv.firstname || ""} {conv.lastname || ""}
+                      </p>
+                      <p className="conversation-last">@{conv.username || "unknown"}</p>
+                    </div>
                   </div>
                 ))}
+            </div>
+
+            <div className="likes-section">
+              <h4>Mes likes envoyés</h4>
+              {loadingLikes && <p>Chargement...</p>}
+              {!loadingLikes && sentLikes.length === 0 && <p>Aucun like.</p>}
+              <div className="likes-list">
+                {!loadingLikes &&
+                  sentLikes.map((u) => (
+                    <div key={u.id} className="like-row">
+                      <span>
+                        {(u.firstname || u.lastname)
+                          ? `${u.firstname} ${u.lastname}`.trim()
+                          : `@${u.username || "unknown"}`}
+                      </span>
+                      <button
+                        type="button"
+                        className="like-delete-btn"
+                        onClick={() => handleDeleteLike(u.id)}
+                        disabled={deletingLikeId === String(u.id)}
+                      >
+                        {deletingLikeId === String(u.id) ? "..." : "Supprimer"}
+                      </button>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
 
@@ -346,7 +370,11 @@ function Message() {
                     <button
                       type="button"
                       className="chat-profile-btn"
-                      onClick={() => navigate(`/profile/${selectedMatch.user_id || selectedMatch.id}`)}
+                      onClick={() =>
+                        navigate(`/profile/${selectedMatch.user_id || selectedMatch.id}`, {
+                          state: { from: "message" },
+                        })
+                      }
                     >
                       Voir profil
                     </button>

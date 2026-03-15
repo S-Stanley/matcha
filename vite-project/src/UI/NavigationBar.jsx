@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "../CSS/NavigationBar.css";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -27,6 +27,7 @@ function normalizeNotification(raw) {
 
 export default function NavigationBar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifLoading, setNotifLoading] = useState(true);
@@ -186,7 +187,12 @@ export default function NavigationBar() {
       <div className="top-center">
         <NavLink
           to="/match"
-          className={({ isActive }) => (isActive ? "top-item active" : "top-item")}
+          className={({ isActive }) =>
+            isActive ||
+            (location.pathname.startsWith("/profile/") && location.state?.from === "match")
+              ? "top-item active"
+              : "top-item"
+          }
         >
           Match
         </NavLink>
@@ -200,13 +206,19 @@ export default function NavigationBar() {
 
         <NavLink
           to="/message"
-          className={({ isActive }) => (isActive ? "top-item active" : "top-item")}
+          className={({ isActive }) =>
+            isActive ||
+            (location.pathname.startsWith("/profile/") && location.state?.from === "message")
+              ? "top-item active"
+              : "top-item"
+          }
         >
           Messages
         </NavLink>
 
         <NavLink
           to="/profile"
+          end
           className={({ isActive }) => (isActive ? "top-item active" : "top-item")}
         >
           Profil
