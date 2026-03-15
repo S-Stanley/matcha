@@ -71,6 +71,42 @@ def get_all_user_notifications():
 SORT_BY_VALUES = ('age', 'popularity', 'city')
 ORDER_VALUES = ('asc', 'desc')
 
+@blueprint.route("/users/nav", methods=['GET'])
+def get_user_nav():
+    user = handlers.get_user_by_token(request.headers.get("token"))
+    if not user:
+        return "Error", 400
+    age_min = request.args.get("ageMin")
+    age_max = request.args.get("ageMax")
+    popularity_min = request.args.get("popularityMin")
+    popularity_max = request.args.get("popularityMax")
+    city = request.args.get("city")
+    tags_value = request.args.get("tags")
+    sort_by = request.args.get("sortBy")
+    order_by = request.args.get("orderBy")
+    try:
+        age_min_int = int(age_min) if age_min is not None else None
+        age_max_int = int(age_max) if age_max is not None else None
+        popularity_min_int = int(popularity_min) if popularity_min is not None else None
+        popularity_max_int = int(popularity_max) if popularity_max is not None else None
+    except ValueError:
+        return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
+    if sort_by is not None and sort_by not in SORT_BY_VALUES:
+        return "Error, unknow value sortby", 400
+    if order_by is not None and order_by not in ORDER_VALUES:
+        return "Error unknow value orderby", 400
+    tags = None if tags_value is None else tags_value.split(",")
+    return handlers.get_all_users_nav(
+        age_min_int,
+        age_max_int,
+        popularity_min_int,
+        popularity_max_int,
+        city=city,
+        tags=tags,
+        sort_by=sort_by,
+        order_by=order_by,
+    ), 200
+
 @blueprint.route("/users", methods=['GET'])
 def get_user_list():
     user = handlers.get_user_by_token(request.headers.get("token"))

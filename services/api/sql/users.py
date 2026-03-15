@@ -34,6 +34,26 @@ GET_ALL_USERS = '''
     ORDER BY {} {}
 '''
 
+GET_ALL_USERS_NAV = '''
+    SELECT "User".id, "User".username, "User".firstname, "User".lastname, "User".popularity, "User".age, "User".city
+    FROM "User"
+    WHERE (%s IS NULL OR age >= %s)
+      AND (%s IS NULL OR age <= %s)
+      AND (%s IS NULL OR popularity >= %s)
+      AND (%s IS NULL OR popularity <= %s)
+      AND (%s IS NULL OR city=%s)
+      AND (
+            %s IS NULL
+            OR EXISTS (
+                SELECT 1
+                FROM "Tags"
+                WHERE "Tags".user_id = "User".id
+                  AND "Tags".tag = ANY(%s)
+            )
+          )
+    ORDER BY {} {}
+'''
+
 DELETE_CONFIRMATION_CODE='''
     UPDATE "User" SET confirm_code=NULL WHERE id=%s;
 '''

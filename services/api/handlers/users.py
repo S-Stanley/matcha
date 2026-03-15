@@ -146,6 +146,56 @@ def is_tag_exist_for_user(user_id, tag):
             return False
         return True
 
+def get_all_users_nav(
+    age_min=None,
+    age_max=None,
+    popularity_min=None,
+    popularity_max=None,
+    city=None,
+    tags=None,
+    sort_by=None,
+    order_by=None
+):
+    sort_by = (sort_by or 'popularity').lower()
+    order_by = (order_by or 'desc').lower()
+
+    if sort_by not in ('age', 'popularity', 'city'):
+        sort_by = 'popularity'
+    if order_by not in ('asc', 'desc'):
+        order_by = 'desc'
+    with conn.cursor() as cur:
+        cur.execute(
+            sql.users.GET_ALL_USERS_NAV.format(sort_by,order_by),
+            (
+                age_min,
+                age_min,
+                age_max,
+                age_max,
+                popularity_min,
+                popularity_min,
+                popularity_max,
+                popularity_max,
+                city,
+                city,
+                tags,
+                tags,
+            )
+        )
+        req = cur.fetchall()
+        conn.commit()
+        output = []
+        for user in req:
+            output.append({
+                "id": user[0],
+                "username": user[1],
+                "firstname": user[2],
+                "lastname": user[3],
+                "popularity": user[4],
+                "age": user[5],
+                "city": user[6],
+            })
+        return output
+
 def create_or_delete_tag(user_id, tag):
     print(
 

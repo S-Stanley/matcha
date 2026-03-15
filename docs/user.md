@@ -66,7 +66,35 @@ curl http://127.0.0.1:5000/users/password/change/request -d username=3 -d passwo
 curl -X POST http://127.0.0.1:5000/users/password/change/confirm -d username=3 -d confirm_code=xxx
 ```
 
-## Get user list/search
+## Get user navigation
+
+```bash
+curl "http://127.0.0.1:5000/users/nav?ageMin=25&ageMax=35" -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
+
+```bash
+curl "http://127.0.0.1:5000/users/nav?sortBy=age&orderBy=desc" -H token:5f737066-f767-4235-bbde-8765a7edff18
+```
+
+Query params:
+* Filtring:
+    * ageMin
+    * ageMax
+    * popularityMin
+    * popularityMax
+    * city
+    * tags: split by comma (eg: ?tags=geek,computer,sleeping)
+* Sorting (sortBy)
+    * age
+    * popularity
+    * city
+* Ordering (orderBy)
+    * asc
+    * desc
+
+
+
+## Get user search
 
 ```bash
 curl "http://127.0.0.1:5000/users?ageMin=25&ageMax=35" -H token:5f737066-f767-4235-bbde-8765a7edff18
