@@ -77,8 +77,20 @@ curl "http://127.0.0.1:5000/users?sortBy=age&orderBy=desc" -H token:5f737066-f76
 ```
 
 
-* Filtres optionnels : `ageMin`, `ageMax`, `popularityMin`, `popularityMax` (entiers)
-* Tri optionnel : `sortBy` = `age` ou `popularity` ; `order` = `asc` ou `desc`. Ex. : `?sortBy=age&order=asc` ou `?sortBy=popularity&order=desc`. Par défaut : tri par popularité décroissante
+Query params:
+* Filtring:
+    * ageMin
+    * ageMax
+    * popularityMin
+    * popularityMax
+    * city
+* Sorting (sortBy)
+    * age
+    * popularity
+    * city
+* Ordering (orderBy)
+    * asc
+    * desc
 
 ## Get all users notifications
 
