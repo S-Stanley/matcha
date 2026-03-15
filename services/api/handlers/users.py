@@ -197,7 +197,7 @@ def get_all_users(
     sort_by = (sort_by or 'popularity').lower()
     order_by = (order_by or 'desc').lower()
 
-    if sort_by not in ('age', 'popularity'):
+    if sort_by not in ('age', 'popularity', 'city'):
         sort_by = 'popularity'
     if order_by not in ('asc', 'desc'):
         order_by = 'desc'
@@ -218,6 +218,7 @@ def get_all_users(
             )
         )
         req = cur.fetchall()
+        conn.commit()
         output = []
         for user in req:
             output.append({

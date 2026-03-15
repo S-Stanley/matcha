@@ -22,7 +22,7 @@ INSERT INTO "User" (
   'user2-matcha',
   'user2',
   'matcha',
-  NULL,
+  'Berlin',
   '$2b$12$F5aC/GukiNJVheLdQMss4.wJQrpo.m8y.jOKia.Vf6buBks22hJu.',
   '5fb9b8f1-8b36-445e-a6c0-a71b1a1efaa2'
 );

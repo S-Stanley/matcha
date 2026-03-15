@@ -68,7 +68,7 @@ def get_all_user_notifications():
         return "Error", 400
     return handlers.get_all_notifications_by_user_id(user['id']), 200
 
-SORT_BY_VALUES = ('age', 'popularity')
+SORT_BY_VALUES = ('age', 'popularity', 'city')
 ORDER_VALUES = ('asc', 'desc')
 
 @blueprint.route("/users", methods=['GET'])
@@ -91,9 +91,9 @@ def get_user_list():
     except ValueError:
         return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
     if sort_by is not None and sort_by not in SORT_BY_VALUES:
-        return "Error, sortBy must be 'age' or 'popularity'", 400
+        return "Error, unknow value sortby", 400
     if order_by is not None and order_by not in ORDER_VALUES:
-        return "Error, order must be 'asc' or 'desc'", 400
+        return "Error unknow value orderby", 400
     return handlers.get_all_users(
         age_min_int,
         age_max_int,
