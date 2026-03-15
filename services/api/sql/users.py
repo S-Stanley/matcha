@@ -15,13 +15,22 @@ IS_BLOCKED = '''
 '''
 
 GET_ALL_USERS = '''
-    SELECT id, username, firstname, lastname, popularity, age, city
+    SELECT "User".id, "User".username, "User".firstname, "User".lastname, "User".popularity, "User".age, "User".city
     FROM "User"
     WHERE (%s IS NULL OR age >= %s)
       AND (%s IS NULL OR age <= %s)
       AND (%s IS NULL OR popularity >= %s)
       AND (%s IS NULL OR popularity <= %s)
       AND (%s IS NULL OR city=%s)
+      AND (
+            %s IS NULL
+            OR EXISTS (
+                SELECT 1
+                FROM "Tags"
+                WHERE "Tags".user_id = "User".id
+                  AND "Tags".tag = ANY(%s)
+            )
+          )
     ORDER BY {} {}
 '''
 

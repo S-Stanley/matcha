@@ -81,6 +81,7 @@ def get_user_list():
     popularity_min = request.args.get("popularityMin")
     popularity_max = request.args.get("popularityMax")
     city = request.args.get("city")
+    tags_value = request.args.get("tags")
     sort_by = request.args.get("sortBy")
     order_by = request.args.get("orderBy")
     try:
@@ -94,12 +95,14 @@ def get_user_list():
         return "Error, unknow value sortby", 400
     if order_by is not None and order_by not in ORDER_VALUES:
         return "Error unknow value orderby", 400
+    tags = None if tags_value is None else tags_value.split(",")
     return handlers.get_all_users(
         age_min_int,
         age_max_int,
         popularity_min_int,
         popularity_max_int,
         city=city,
+        tags=tags,
         sort_by=sort_by,
         order_by=order_by,
     ), 200

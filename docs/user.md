@@ -84,6 +84,7 @@ Query params:
     * popularityMin
     * popularityMax
     * city
+    * tags: split by comma (eg: ?tags=geek,computer,sleeping)
 * Sorting (sortBy)
     * age
     * popularity

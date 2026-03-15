@@ -191,6 +191,7 @@ def get_all_users(
     popularity_min=None,
     popularity_max=None,
     city=None,
+    tags=None,
     sort_by=None,
     order_by=None
 ):
@@ -215,6 +216,8 @@ def get_all_users(
                 popularity_max,
                 city,
                 city,
+                tags,
+                tags,
             )
         )
         req = cur.fetchall()
