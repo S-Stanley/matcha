@@ -185,7 +185,15 @@ def get_all_notifications_by_user_id(user_id):
             })
         return output
 
-def get_all_users(age_min=None, age_max=None, popularity_min=None, popularity_max=None, sort_by=None, order_by=None):
+def get_all_users(
+    age_min=None,
+    age_max=None,
+    popularity_min=None,
+    popularity_max=None,
+    city=None,
+    sort_by=None,
+    order_by=None
+):
     sort_by = (sort_by or 'popularity').lower()
     order_by = (order_by or 'desc').lower()
 
@@ -193,7 +201,6 @@ def get_all_users(age_min=None, age_max=None, popularity_min=None, popularity_ma
         sort_by = 'popularity'
     if order_by not in ('asc', 'desc'):
         order_by = 'desc'
-    print(sql.users.GET_ALL_USERS.format(sort_by,order_by))
     with conn.cursor() as cur:
         cur.execute(
             sql.users.GET_ALL_USERS.format(sort_by,order_by),
@@ -206,6 +213,8 @@ def get_all_users(age_min=None, age_max=None, popularity_min=None, popularity_ma
                 popularity_min,
                 popularity_max,
                 popularity_max,
+                city,
+                city,
             )
         )
         req = cur.fetchall()
@@ -218,6 +227,7 @@ def get_all_users(age_min=None, age_max=None, popularity_min=None, popularity_ma
                 "lastname": user[3],
                 "popularity": user[4],
                 "age": user[5],
+                "city": user[6],
             })
         return output
     

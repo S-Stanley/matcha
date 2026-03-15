@@ -4,6 +4,7 @@ INSERT INTO "User" (
   username,
   firstname,
   lastname,
+  city,
   password,
   token
 ) VALUES (
@@ -12,6 +13,7 @@ INSERT INTO "User" (
   'user-matcha',
   'user',
   'matcha',
+  'Paris',
   '$2b$12$F5aC/GukiNJVheLdQMss4.wJQrpo.m8y.jOKia.Vf6buBks22hJu.',
   '5f737066-f767-4235-bbde-8765a7edff18'
 ), (
@@ -20,6 +22,7 @@ INSERT INTO "User" (
   'user2-matcha',
   'user2',
   'matcha',
+  NULL,
   '$2b$12$F5aC/GukiNJVheLdQMss4.wJQrpo.m8y.jOKia.Vf6buBks22hJu.',
   '5fb9b8f1-8b36-445e-a6c0-a71b1a1efaa2'
 );

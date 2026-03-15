@@ -80,6 +80,7 @@ def get_user_list():
     age_max = request.args.get("ageMax")
     popularity_min = request.args.get("popularityMin")
     popularity_max = request.args.get("popularityMax")
+    city = request.args.get("city")
     sort_by = request.args.get("sortBy")
     order_by = request.args.get("orderBy")
     try:
@@ -98,6 +99,7 @@ def get_user_list():
         age_max_int,
         popularity_min_int,
         popularity_max_int,
+        city=city,
         sort_by=sort_by,
         order_by=order_by,
     ), 200
