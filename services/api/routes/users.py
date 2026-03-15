@@ -6,163 +6,210 @@ import handlers, utils
 
 @blueprint.route("/users/<blocked_user_id>/block", methods=['POST'])
 def report_user(blocked_user_id):
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    handlers.create_block(blocked_user_id, user['id'])
-    has_existing_match = handlers.check_if_match_exist([blocked_user_id, user['id']])
-    handlers.delete_match_from_unlike(has_existing_match['id']);
-    return { "is_blocked": True }, 200
+    try:
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        handlers.create_block(blocked_user_id, user['id'])
+        has_existing_match = handlers.check_if_match_exist([blocked_user_id, user['id']])
+        if has_existing_match:
+            handlers.delete_match_from_unlike(has_existing_match['id'])
+        return { "is_blocked": True }, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users/<reported_user_id>/report", methods=['POST'])
 def block_user(reported_user_id):
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    handlers.create_report(reported_user_id, user['id'])
-    return { "reported": True }, 200
+    try:
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        handlers.create_report(reported_user_id, user['id'])
+        return { "reported": True }, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users/tag/<tag_name>", methods=['PATCH'])
 def update_tag(tag_name):
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    handlers.create_or_delete_tag(user['id'], tag_name)
-    return { "updated": True }, 200
+    try:
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        handlers.create_or_delete_tag(user['id'], tag_name)
+        return { "updated": True }, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users/picture", methods=['PATCH'])
 def add_profile_picture():
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    if 'file' not in request.files:
-        return "Error, file is required", 400
-    current_count = handlers.get_pictures_count_by_user_id(user['id'])
-    if current_count >= 5:
-        return "Error, cannot upload more than 5 pictures", 400
-    url = utils.upload_files(user['id'], request.files['file'])
-    picture = handlers.create_picture(user['id'], url)
-    return { "picture": picture, "total": current_count + 1 }, 201
+    try:
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        if 'file' not in request.files:
+            return "Error, file is required", 400
+        current_count = handlers.get_pictures_count_by_user_id(user['id'])
+        if current_count >= 5:
+            return "Error, cannot upload more than 5 pictures", 400
+        url = utils.upload_files(user['id'], request.files['file'])
+        picture = handlers.create_picture(user['id'], url)
+        if not picture:
+            return "Error", 400
+        return { "picture": picture, "total": current_count + 1 }, 201
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users/picture/<picture_id>", methods=['DELETE'])
 def delete_profile_picture(picture_id):
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    handlers.delete_picture_by_id_for_user(picture_id, user['id'])
-    return { "deleted": True }, 200
+    try:
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        handlers.delete_picture_by_id_for_user(picture_id, user['id'])
+        return { "deleted": True }, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 
 @blueprint.route("/users/me/notifications", methods=['PATCH'])
 def set_all_notifications_as_read_by_user_id():
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    handlers.set_all_user_notifications_as_read(user['id'])
-    return { "updated": True }, 200
+    try:
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        handlers.set_all_user_notifications_as_read(user['id'])
+        return { "updated": True }, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users/me/notifications", methods=['GET'])
 def get_all_user_notifications():
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    return handlers.get_all_notifications_by_user_id(user['id']), 200
+    try:
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        return handlers.get_all_notifications_by_user_id(user['id']), 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 SORT_BY_VALUES = ('age', 'popularity', 'city')
 ORDER_VALUES = ('asc', 'desc')
 
 @blueprint.route("/users/nav", methods=['GET'])
 def get_user_nav():
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    age_min = request.args.get("ageMin")
-    age_max = request.args.get("ageMax")
-    popularity_min = request.args.get("popularityMin")
-    popularity_max = request.args.get("popularityMax")
-    city = request.args.get("city")
-    tags_value = request.args.get("tags")
-    sort_by = request.args.get("sortBy")
-    order_by = request.args.get("orderBy")
     try:
-        age_min_int = int(age_min) if age_min is not None else None
-        age_max_int = int(age_max) if age_max is not None else None
-        popularity_min_int = int(popularity_min) if popularity_min is not None else None
-        popularity_max_int = int(popularity_max) if popularity_max is not None else None
-    except ValueError:
-        return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
-    if sort_by is not None and sort_by not in SORT_BY_VALUES:
-        return "Error, unknow value sortby", 400
-    if order_by is not None and order_by not in ORDER_VALUES:
-        return "Error unknow value orderby", 400
-    tags = None if tags_value is None else tags_value.split(",")
-    filteredGender = utils.getGenderFilter(user['gender'], user['preference'])
-    return handlers.get_all_users_nav(
-        user,
-        age_min_int,
-        age_max_int,
-        popularity_min_int,
-        popularity_max_int,
-        city=city,
-        tags=tags,
-        filteredGender=filteredGender,
-        sort_by=sort_by,
-        order_by=order_by,
-    ), 200
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        age_min = request.args.get("ageMin")
+        age_max = request.args.get("ageMax")
+        popularity_min = request.args.get("popularityMin")
+        popularity_max = request.args.get("popularityMax")
+        city = request.args.get("city")
+        tags_value = request.args.get("tags")
+        sort_by = request.args.get("sortBy")
+        order_by = request.args.get("orderBy")
+        try:
+            age_min_int = int(age_min) if age_min is not None else None
+            age_max_int = int(age_max) if age_max is not None else None
+            popularity_min_int = int(popularity_min) if popularity_min is not None else None
+            popularity_max_int = int(popularity_max) if popularity_max is not None else None
+        except ValueError:
+            return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
+        if sort_by is not None and sort_by not in SORT_BY_VALUES:
+            return "Error, unknow value sortby", 400
+        if order_by is not None and order_by not in ORDER_VALUES:
+            return "Error unknow value orderby", 400
+        tags = None if tags_value is None else tags_value.split(",")
+        filteredGender = utils.getGenderFilter(user['gender'], user['preference'])
+        return handlers.get_all_users_nav(
+            user,
+            age_min_int,
+            age_max_int,
+            popularity_min_int,
+            popularity_max_int,
+            city=city,
+            tags=tags,
+            filteredGender=filteredGender,
+            sort_by=sort_by,
+            order_by=order_by,
+        ), 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users", methods=['GET'])
 def get_user_list():
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    age_min = request.args.get("ageMin")
-    age_max = request.args.get("ageMax")
-    popularity_min = request.args.get("popularityMin")
-    popularity_max = request.args.get("popularityMax")
-    city = request.args.get("city")
-    tags_value = request.args.get("tags")
-    sort_by = request.args.get("sortBy")
-    order_by = request.args.get("orderBy")
     try:
-        age_min_int = int(age_min) if age_min is not None else None
-        age_max_int = int(age_max) if age_max is not None else None
-        popularity_min_int = int(popularity_min) if popularity_min is not None else None
-        popularity_max_int = int(popularity_max) if popularity_max is not None else None
-    except ValueError:
-        return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
-    if sort_by is not None and sort_by not in SORT_BY_VALUES:
-        return "Error, unknow value sortby", 400
-    if order_by is not None and order_by not in ORDER_VALUES:
-        return "Error unknow value orderby", 400
-    tags = None if tags_value is None else tags_value.split(",")
-    return handlers.get_all_users(
-        age_min_int,
-        age_max_int,
-        popularity_min_int,
-        popularity_max_int,
-        city=city,
-        tags=tags,
-        sort_by=sort_by,
-        order_by=order_by,
-    ), 200
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        age_min = request.args.get("ageMin")
+        age_max = request.args.get("ageMax")
+        popularity_min = request.args.get("popularityMin")
+        popularity_max = request.args.get("popularityMax")
+        city = request.args.get("city")
+        tags_value = request.args.get("tags")
+        sort_by = request.args.get("sortBy")
+        order_by = request.args.get("orderBy")
+        try:
+            age_min_int = int(age_min) if age_min is not None else None
+            age_max_int = int(age_max) if age_max is not None else None
+            popularity_min_int = int(popularity_min) if popularity_min is not None else None
+            popularity_max_int = int(popularity_max) if popularity_max is not None else None
+        except ValueError:
+            return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
+        if sort_by is not None and sort_by not in SORT_BY_VALUES:
+            return "Error, unknow value sortby", 400
+        if order_by is not None and order_by not in ORDER_VALUES:
+            return "Error unknow value orderby", 400
+        tags = None if tags_value is None else tags_value.split(",")
+        return handlers.get_all_users(
+            age_min_int,
+            age_max_int,
+            popularity_min_int,
+            popularity_max_int,
+            city=city,
+            tags=tags,
+            sort_by=sort_by,
+            order_by=order_by,
+        ), 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users/password/change/confirm", methods=['POST'])
 def confirm_password_change():
-    if 'username' not in request.form or 'confirm_code' not in request.form:
-        return "Error", 400
-    if not handlers.check_confirm_password_request(request.form['username'], request.form['confirm_code']):
-        return { "updated": False }, 400
-    return { "updated": True }, 200
+    try:
+        if 'username' not in request.form or 'confirm_code' not in request.form:
+            return "Error", 400
+        if not handlers.check_confirm_password_request(request.form['username'], request.form['confirm_code']):
+            return { "updated": False }, 400
+        return { "updated": True }, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users/me", methods=['GET'])
 def get_user_me():
-    user = handlers.get_user_by_token(request.headers.get("token"))
-    if not user:
-        return "Error", 400
-    pictures = handlers.get_pictures_by_user_id(user['id'])
-    user_with_pictures = dict(user)
-    user_with_pictures['pictures'] = pictures
-    return user_with_pictures, 200
+    try:
+        user = handlers.get_user_by_token(request.headers.get("token"))
+        if not user:
+            return "Error", 400
+        pictures = handlers.get_pictures_by_user_id(user['id'])
+        user_with_pictures = dict(user)
+        user_with_pictures['pictures'] = pictures
+        return user_with_pictures, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users/<user_id>", methods=['GET'])
 def get_user_by_id(user_id):
@@ -191,12 +238,16 @@ def get_user_by_id(user_id):
 
 @blueprint.route("/users/signup/confirm", methods=['POST'])
 def confirm_user_signup():
-    user = handlers.is_confirmation_code_successful(request.form['username'], request.form['confirm_code'])
-    if not user:
-        print("Wrong confirmation conde")
-        return "Error", 400
-    handlers.create_login(user['id'])
-    return user, 200
+    try:
+        user = handlers.is_confirmation_code_successful(request.form['username'], request.form['confirm_code'])
+        if not user:
+            print("Wrong confirmation conde")
+            return "Error", 400
+        handlers.create_login(user['id'])
+        return user, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users", methods=['POST'])
 def create_user():
@@ -276,13 +327,17 @@ PREFERENCE = [
 
 @blueprint.route("/users/password/change/request", methods=['POST'])
 def request_new_password():
-    is_request_successful = handlers.request_new_password(
-        username=request.form['username'],
-        password=request.form['password'],
-    )
-    if not is_request_successful:
-        return { "requested": False }, 400
-    return { "requested": True }, 200
+    try:
+        is_request_successful = handlers.request_new_password(
+            username=request.form['username'],
+            password=request.form['password'],
+        )
+        if not is_request_successful:
+            return { "requested": False }, 400
+        return { "requested": True }, 200
+    except Exception as e:
+        print(e)
+        return "Error", 500
 
 @blueprint.route("/users", methods=['PATCH'])
 def patch_user():
