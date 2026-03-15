@@ -96,6 +96,7 @@ def get_user_nav():
     if order_by is not None and order_by not in ORDER_VALUES:
         return "Error unknow value orderby", 400
     tags = None if tags_value is None else tags_value.split(",")
+    filteredGender = utils.getGenderFilter(user['gender'], user['preference'])
     return handlers.get_all_users_nav(
         age_min_int,
         age_max_int,
@@ -103,6 +104,7 @@ def get_user_nav():
         popularity_max_int,
         city=city,
         tags=tags,
+        filteredGender=filteredGender,
         sort_by=sort_by,
         order_by=order_by,
     ), 200

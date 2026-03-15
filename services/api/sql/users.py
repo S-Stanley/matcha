@@ -18,11 +18,11 @@ GET_ALL_USERS = '''
     SELECT "User".id, "User".username, "User".firstname, "User".lastname, "User".popularity, "User".age, "User".city
     FROM "User"
     WHERE (%s IS NULL OR age >= %s)
-      AND (%s IS NULL OR age <= %s)
-      AND (%s IS NULL OR popularity >= %s)
-      AND (%s IS NULL OR popularity <= %s)
-      AND (%s IS NULL OR city=%s)
-      AND (
+        AND (%s IS NULL OR age <= %s)
+        AND (%s IS NULL OR popularity >= %s)
+        AND (%s IS NULL OR popularity <= %s)
+        AND (%s IS NULL OR city=%s)
+        AND (
             %s IS NULL
             OR EXISTS (
                 SELECT 1
@@ -38,11 +38,11 @@ GET_ALL_USERS_NAV = '''
     SELECT "User".id, "User".username, "User".firstname, "User".lastname, "User".popularity, "User".age, "User".city
     FROM "User"
     WHERE (%s IS NULL OR age >= %s)
-      AND (%s IS NULL OR age <= %s)
-      AND (%s IS NULL OR popularity >= %s)
-      AND (%s IS NULL OR popularity <= %s)
-      AND (%s IS NULL OR city=%s)
-      AND (
+        AND (%s IS NULL OR age <= %s)
+        AND (%s IS NULL OR popularity >= %s)
+        AND (%s IS NULL OR popularity <= %s)
+        AND (%s IS NULL OR city=%s)
+        AND (
             %s IS NULL
             OR EXISTS (
                 SELECT 1
@@ -51,6 +51,7 @@ GET_ALL_USERS_NAV = '''
                   AND "Tags".tag = ANY(%s)
             )
           )
+        AND "User".gender = ANY(%s::GENDER[])
     ORDER BY {} {}
 '''
 

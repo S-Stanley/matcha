@@ -153,8 +153,9 @@ def get_all_users_nav(
     popularity_max=None,
     city=None,
     tags=None,
+    filteredGender=None,
     sort_by=None,
-    order_by=None
+    order_by=None,
 ):
     sort_by = (sort_by or 'popularity').lower()
     order_by = (order_by or 'desc').lower()
@@ -179,6 +180,7 @@ def get_all_users_nav(
                 city,
                 tags,
                 tags,
+                filteredGender,
             )
         )
         req = cur.fetchall()

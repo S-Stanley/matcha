@@ -5,6 +5,8 @@ INSERT INTO "User" (
   firstname,
   lastname,
   city,
+  gender,
+  preference,
   password,
   token
 ) VALUES (
@@ -14,6 +16,8 @@ INSERT INTO "User" (
   'user',
   'matcha',
   'Paris',
+  'MALE',
+  'FEMALE',
   '$2b$12$F5aC/GukiNJVheLdQMss4.wJQrpo.m8y.jOKia.Vf6buBks22hJu.',
   '5f737066-f767-4235-bbde-8765a7edff18'
 ), (
@@ -23,6 +27,8 @@ INSERT INTO "User" (
   'user2',
   'matcha',
   'Berlin',
+  'FEMALE',
+  'MALE',
   '$2b$12$F5aC/GukiNJVheLdQMss4.wJQrpo.m8y.jOKia.Vf6buBks22hJu.',
   '5fb9b8f1-8b36-445e-a6c0-a71b1a1efaa2'
 );
