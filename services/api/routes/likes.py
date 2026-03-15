@@ -11,6 +11,7 @@ def delete_like_endpoint(liked_user_id):
     has_existing_match = handlers.check_if_match_exist([liked_user_id, connected_user['id']])
     handlers.delete_like(liked_user_id, connected_user['id'])
     if has_existing_match:
+        handlers.update_popularity_score(liked_user_id, -20);
         handlers.delete_match_from_unlike(has_existing_match['id']);
         handlers.create_notification({
             "user_id":liked_user_id,
@@ -57,6 +58,7 @@ def create_like():
         })
     else:
         print("It is not a match..")
+    handlers.update_popularity_score(request.form['liked_user'], 10);
     return {
         "like": like_created,
         "is_new_match": True if is_new_match else False,

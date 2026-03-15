@@ -1,3 +1,9 @@
+UPDATE_POPULARITY_SCORE = '''
+    UPDATE "User"
+    SET popularity = popularity + %s::integer
+    WHERE id = %s
+'''
+
 CREATE_LOGIN='''
     INSERT INTO "Login" (user_id) VALUES (%s);
 '''

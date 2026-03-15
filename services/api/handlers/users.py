@@ -146,6 +146,17 @@ def is_tag_exist_for_user(user_id, tag):
             return False
         return True
 
+def update_popularity_score(user_id, delta):
+    with conn.cursor() as cur:
+        req = cur.execute(
+            sql.users.UPDATE_POPULARITY_SCORE,
+            (
+                delta,
+                user_id,
+            )
+        )
+        conn.commit()
+
 def get_all_users_nav(
     user,
     age_min=None,

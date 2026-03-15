@@ -16,6 +16,7 @@ def create_new_view():
         "profileUserId": request.form['profileUserId'],
         "viewerUserId": user['id']
     })
+    handlers.update_popularity_score(request.form['profileUserId'], 1);
     handlers.create_notification({
         "user_id": request.form['profileUserId'],
         "type": "NEW_VIEW",
