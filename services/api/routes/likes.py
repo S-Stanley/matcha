@@ -32,6 +32,13 @@ def create_like():
             return "Error", 400
         if handlers.get_pictures_count_by_user_id(user['id']) == 0:
             return "Error, cannot like without picture", 400
+        is_user_already_liked = handlers.is_user_liked(request.form['liked_user'], user['id'])
+        if is_user_already_liked:
+            return {
+                "like": is_user_already_liked,
+                "is_new_match": False,
+                "match": None
+            }, 200
         like_created = handlers.create_like({
             "liked_by": user['id'],
             "liked_user": request.form['liked_user']

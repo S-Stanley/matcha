@@ -30,7 +30,11 @@ def is_user_liked(liked_user_id, connected_user_id):
             )
             req = cur.fetchone()
             conn.commit()
-            return False if req is None else True
+            return False if req is None else {
+                "id": req[0],
+                "likedBy": req[1],
+                "libedUser": req[2],
+            }
     except Exception as e:
         conn.rollback()
         print(e)

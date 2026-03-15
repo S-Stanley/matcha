@@ -14,7 +14,7 @@ CREATE_LIKE = '''
 '''
 
 CHECK_IS_USER_LIKED = '''
-    SELECT id FROM "Like" WHERE liked_user=%s AND liked_by=%s;
+    SELECT id, liked_by, liked_user FROM "Like" WHERE liked_user=%s AND liked_by=%s;
 '''
 
 GET_LIKE_LIST = '''
