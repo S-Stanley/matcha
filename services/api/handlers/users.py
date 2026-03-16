@@ -231,19 +231,31 @@ def get_all_users_nav(
     sort_by=None,
     order_by=None,
 ):
-    sort_by = sort_by.lower() if sort_by else None
-    order_by = order_by.lower() if order_by else None
+    sort_by = (sort_by or "").lower()
+    order_by = (order_by or "desc").lower()
 
-    cityOfUser = user['city'] if user['city'] else ""
-    ageOfUser = user['age'] if user['age'] else "0"
-    if sort_by not in ('age', 'popularity', 'city'):
-        sort_by = '(CASE WHEN "User".city = \'{}\' THEN 100 ELSE 0 END + "User".popularity * 10 + "User".age - {})'.format(cityOfUser, ageOfUser)
-    if order_by not in ('asc', 'desc'):
-        order_by = 'desc'
+    if order_by not in ("asc", "desc"):
+        order_by = "desc"
+
+    city_of_user = user["city"] or ""
+    age_of_user = user["age"] or 0
+
+    extra_params = ()
+
+    if sort_by == "age":
+        order_sql = '"User".age'
+    elif sort_by == "popularity":
+        order_sql = '"User".popularity'
+    elif sort_by == "city":
+        order_sql = '"User".city'
+    else:
+        order_sql = '(CASE WHEN "User".city = %s THEN 100 ELSE 0 END + "User".popularity * 10 + "User".age - %s::integer)'
+        extra_params = (city_of_user, age_of_user)
+
     try:
         with conn.cursor() as cur:
             cur.execute(
-                sql.users.GET_ALL_USERS_NAV.format(sort_by,order_by),
+                sql.users.GET_ALL_USERS_NAV.format(order_sql,order_by),
                 (
                     age_min,
                     age_min,
@@ -259,7 +271,7 @@ def get_all_users_nav(
                     tags,
                     filteredGender,
                     exceptUsersIds,
-                )
+                ) + extra_params
             )
             req = cur.fetchall()
             conn.commit()
