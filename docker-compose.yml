@@ -14,10 +14,11 @@ services:
     container_name: api
     env_file: .env
     ports:
-      - 5001:5000
+      - 5000:5000
     restart: always
   webapp:
-    build: vite-project/
+    build: 
+      context: vite-project/
     container_name: webapp
     ports:
       - 4173:4173
