@@ -37,6 +37,7 @@ GET_ALL_USERS = '''
                   AND "Tags".tag = ANY(%s)
             )
           )
+        AND NOT ("User".id = ANY(%s::uuid[]))
     ORDER BY {} {}
 '''
 
@@ -58,6 +59,7 @@ GET_ALL_USERS_NAV = '''
             )
           )
         AND "User".gender = ANY(%s::GENDER[])
+        AND NOT ("User".id = ANY(%s::uuid[]))
     ORDER BY {} {} NULLS LAST
 '''
 

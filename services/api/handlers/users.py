@@ -210,6 +210,7 @@ def get_all_users_nav(
     city=None,
     tags=None,
     filteredGender=None,
+    exceptUsersIds=[],
     sort_by=None,
     order_by=None,
 ):
@@ -240,6 +241,7 @@ def get_all_users_nav(
                     tags,
                     tags,
                     filteredGender,
+                    exceptUsersIds,
                 )
             )
             req = cur.fetchall()
@@ -314,6 +316,7 @@ def get_all_users(
     popularity_max=None,
     city=None,
     tags=None,
+    exceptUsersIds=[],
     sort_by=None,
     order_by=None
 ):
@@ -341,6 +344,7 @@ def get_all_users(
                     city,
                     tags,
                     tags,
+                    exceptUsersIds,
                 )
             )
             req = cur.fetchall()

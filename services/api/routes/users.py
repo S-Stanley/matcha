@@ -131,6 +131,8 @@ def get_user_nav():
             return "Error, unknown value orderBy", 400
         tags = None if tags_value is None else tags_value.split(",")
         filteredGender = utils.getGenderFilter(user['gender'], user['preference'])
+        exceptUsersIds = []
+        exceptUsersIds.append(user['id'])
         return handlers.get_all_users_nav(
             user,
             age_min_int,
@@ -140,6 +142,7 @@ def get_user_nav():
             city=city,
             tags=tags,
             filteredGender=filteredGender,
+            exceptUsersIds=exceptUsersIds,
             sort_by=sort_by,
             order_by=order_by,
         ), 200
@@ -173,6 +176,8 @@ def get_user_list():
         if order_by is not None and order_by not in ORDER_VALUES:
             return "Error, unknown value orderBy", 400
         tags = None if tags_value is None else tags_value.split(",")
+        exceptUsersIds = []
+        exceptUsersIds.append(user['id'])
         return handlers.get_all_users(
             age_min_int,
             age_max_int,
@@ -180,6 +185,7 @@ def get_user_list():
             popularity_max_int,
             city=city,
             tags=tags,
+            exceptUsersIds=exceptUsersIds,
             sort_by=sort_by,
             order_by=order_by,
         ), 200
