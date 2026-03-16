@@ -12,6 +12,7 @@ def report_user(blocked_user_id):
             return "Error", 400
         handlers.create_block(blocked_user_id, user['id'])
         has_existing_match = handlers.check_if_match_exist([blocked_user_id, user['id']])
+        handlers.update_popularity_score(liked_user_id, -20)
         if has_existing_match:
             handlers.delete_match_from_unlike(has_existing_match['id'])
         return { "is_blocked": True }, 200
@@ -26,6 +27,7 @@ def block_user(reported_user_id):
         if not user:
             return "Error", 400
         handlers.create_report(reported_user_id, user['id'])
+        handlers.update_popularity_score(liked_user_id, -50)
         return { "reported": True }, 200
     except Exception as e:
         print(e)
