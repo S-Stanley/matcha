@@ -12,6 +12,10 @@ CREATE_REPORT = '''
     INSERT INTO "Report" (user_id, from_user_id) VALUES (%s, %s);
 '''
 
+GET_ALL_USERS_ID_BLOCKED = '''
+    SELECT user_id from "Block" WHERE from_user_id=%s;
+'''
+
 CREATE_BLOCK = '''
     INSERT INTO "Block" (user_id, from_user_id) VALUES (%s, %s);
 '''

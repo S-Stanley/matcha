@@ -12,7 +12,7 @@ def report_user(blocked_user_id):
             return "Error", 400
         handlers.create_block(blocked_user_id, user['id'])
         has_existing_match = handlers.check_if_match_exist([blocked_user_id, user['id']])
-        handlers.update_popularity_score(liked_user_id, -20)
+        handlers.update_popularity_score(blocked_user_id, -20)
         if has_existing_match:
             handlers.delete_match_from_unlike(has_existing_match['id'])
         return { "is_blocked": True }, 200
@@ -27,7 +27,7 @@ def block_user(reported_user_id):
         if not user:
             return "Error", 400
         handlers.create_report(reported_user_id, user['id'])
-        handlers.update_popularity_score(liked_user_id, -50)
+        handlers.update_popularity_score(reported_user_id, -50)
         return { "reported": True }, 200
     except Exception as e:
         print(e)
@@ -131,7 +131,8 @@ def get_user_nav():
             return "Error, unknown value orderBy", 400
         tags = None if tags_value is None else tags_value.split(",")
         filteredGender = utils.getGenderFilter(user['gender'], user['preference'])
-        exceptUsersIds = []
+        exceptUsersIds = handlers.get_all_users_ids_blocked(user['id'])
+        print(exceptUsersIds)
         exceptUsersIds.append(user['id'])
         return handlers.get_all_users_nav(
             user,
@@ -176,7 +177,7 @@ def get_user_list():
         if order_by is not None and order_by not in ORDER_VALUES:
             return "Error, unknown value orderBy", 400
         tags = None if tags_value is None else tags_value.split(",")
-        exceptUsersIds = []
+        exceptUsersIds = handlers.get_all_users_ids_blocked(user['id'])
         exceptUsersIds.append(user['id'])
         return handlers.get_all_users(
             age_min_int,

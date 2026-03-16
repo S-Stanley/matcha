@@ -34,6 +34,23 @@ def create_report(user_id, from_user_id):
         print(e)
         raise
 
+def get_all_users_ids_blocked(from_user_id):
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                sql.users.GET_ALL_USERS_ID_BLOCKED,
+                (
+                    from_user_id,
+                )
+            )
+            req = cur.fetchall()
+            conn.commit()
+            return req
+    except Exception as e:
+        conn.rollback()
+        print(e)
+        raise
+
 def create_block(user_id, from_user_id):
     try:
         with conn.cursor() as cur:
