@@ -1,4 +1,6 @@
-FROM node:22.11
+FROM node:22.12
+
+WORKDIR app/
 
 COPY package.json package-lock.json .
 RUN npm ci
