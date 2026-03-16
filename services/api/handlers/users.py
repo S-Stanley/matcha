@@ -657,6 +657,9 @@ def get_user_by_token(token):
             )
             found_user = cur.fetchone()
             conn.commit()
+            if not found_user:
+                print("user not found")
+                raise Exception("User not found")
             return {
                 "id": found_user[0],
                 "email": found_user[1],

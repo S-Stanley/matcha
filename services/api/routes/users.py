@@ -126,9 +126,9 @@ def get_user_nav():
         except ValueError:
             return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
         if sort_by is not None and sort_by not in SORT_BY_VALUES:
-            return "Error, unknow value sortby", 400
+            return "Error, unknown value sortBy", 400
         if order_by is not None and order_by not in ORDER_VALUES:
-            return "Error unknow value orderby", 400
+            return "Error, unknown value orderBy", 400
         tags = None if tags_value is None else tags_value.split(",")
         filteredGender = utils.getGenderFilter(user['gender'], user['preference'])
         return handlers.get_all_users_nav(
@@ -169,9 +169,9 @@ def get_user_list():
         except ValueError:
             return "Error, ageMin, ageMax, popularityMin and popularityMax must be integers", 400
         if sort_by is not None and sort_by not in SORT_BY_VALUES:
-            return "Error, unknow value sortby", 400
+            return "Error, unknown value sortBy", 400
         if order_by is not None and order_by not in ORDER_VALUES:
-            return "Error unknow value orderby", 400
+            return "Error, unknown value orderBy", 400
         tags = None if tags_value is None else tags_value.split(",")
         return handlers.get_all_users(
             age_min_int,
@@ -243,7 +243,7 @@ def confirm_user_signup():
     try:
         user = handlers.is_confirmation_code_successful(request.form['username'], request.form['confirm_code'])
         if not user:
-            print("Wrong confirmation conde")
+            print("Wrong confirmation code")
             return "Error", 400
         handlers.create_login(user['id'])
         return user, 200
@@ -263,8 +263,8 @@ def create_user():
             print("Username already exist")
             return "Username already exist", 400
         if utils.check_new_user_input_len(request.form) is False:
-            print("Somes input are too long")
-            return "Somes input are too long", 400
+            print("Some inputs are too long")
+            return "Some inputs are too long", 400
         if utils.check_password_not_commun(request.form['password']) is False:
             print("Password is too common")
             return "Password is too common", 400
