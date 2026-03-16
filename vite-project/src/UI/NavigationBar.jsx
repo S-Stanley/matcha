@@ -8,6 +8,9 @@ import {
   markAllNotificationsAsRead,
 } from "../api";
 
+const NOTIFICATIONS_REFRESH_MS = 5000;
+const NOTIFICATIONS_HISTORY_LIMIT = 50;
+
 function normalizeNotification(raw) {
   if (Array.isArray(raw)) {
     return {
@@ -25,6 +28,53 @@ function normalizeNotification(raw) {
   };
 }
 
+function toTimestamp(value) {
+  const ts = Date.parse(value || "");
+  return Number.isNaN(ts) ? 0 : ts;
+}
+
+function getNotificationKey(item) {
+  if (item?.id) return `id:${item.id}`;
+  return `fallback:${item?.type || "UNKNOWN"}:${item?.from_user_id || "unknown"}:${item?.created_at || "unknown"}`;
+}
+
+function getStorageKey(userId) {
+  return `notifications_history_${userId || "unknown"}`;
+}
+
+function loadNotificationsHistory(userId) {
+  if (!userId) return [];
+  try {
+    const raw = localStorage.getItem(getStorageKey(userId));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeNotification);
+  } catch {
+    return [];
+  }
+}
+
+function saveNotificationsHistory(userId, list) {
+  if (!userId) return;
+  try {
+    localStorage.setItem(getStorageKey(userId), JSON.stringify(list));
+  } catch {
+    // Ignore storage errors and keep UI functional.
+  }
+}
+
+function mergeNotifications(existing, incoming) {
+  const byKey = new Map();
+  [...incoming, ...existing].forEach((item) => {
+    const normalized = normalizeNotification(item);
+    byKey.set(getNotificationKey(normalized), normalized);
+  });
+  return Array.from(byKey.values())
+    .sort((a, b) => toTimestamp(b.created_at) - toTimestamp(a.created_at))
+    .slice(0, NOTIFICATIONS_HISTORY_LIMIT);
+}
+
 export default function NavigationBar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,16 +82,49 @@ export default function NavigationBar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifLoading, setNotifLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [notifUsersById, setNotifUsersById] = useState({});
   const notifRef = useRef(null);
+  const historyLoadedRef = useRef(false);
+  const notificationsRef = useRef([]);
+
+  useEffect(() => {
+    notificationsRef.current = notifications;
+  }, [notifications]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+    if (!token || !userId) {
+      historyLoadedRef.current = false;
+      setNotifications([]);
+      notificationsRef.current = [];
+      return;
+    }
+    const history = loadNotificationsHistory(userId);
+    setNotifications(history);
+    notificationsRef.current = history;
+    historyLoadedRef.current = true;
+  }, []);
 
   useEffect(() => {
     const loadNotifications = async () => {
       const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
       if (!token) {
         setNotifLoading(false);
         setNotifications([]);
+        setNotifUsersById({});
+        setUnreadCount(0);
+        notificationsRef.current = [];
+        historyLoadedRef.current = false;
         return;
+      }
+      if (userId && !historyLoadedRef.current) {
+        const history = loadNotificationsHistory(userId);
+        setNotifications(history);
+        notificationsRef.current = history;
+        historyLoadedRef.current = true;
       }
       setNotifLoading(true);
       try {
@@ -49,14 +132,21 @@ export default function NavigationBar() {
           getUserNotifications(token),
           getUsers(token).catch(() => []),
         ]);
-        const list = (Array.isArray(data) ? data : []).map(normalizeNotification);
-        setNotifications(list);
+        const unreadList = (Array.isArray(data) ? data : []).map(normalizeNotification);
+        setUnreadCount(unreadList.length);
+        const mergedNotifications = mergeNotifications(notificationsRef.current, unreadList);
+        setNotifications(mergedNotifications);
+        notificationsRef.current = mergedNotifications;
+        if (userId) {
+          saveNotificationsHistory(userId, mergedNotifications);
+        }
         const usersMap = {};
         (Array.isArray(userList) ? userList : []).forEach((u) => {
           usersMap[String(u.id)] = u;
         });
 
-        const uniqueFromIds = [...new Set(list.map((n) => n.from_user_id).filter(Boolean))];
+        const mergedForUserLookup = mergedNotifications;
+        const uniqueFromIds = [...new Set(mergedForUserLookup.map((n) => n.from_user_id).filter(Boolean))];
         if (uniqueFromIds.length > 0) {
           const users = await Promise.all(
             uniqueFromIds.map((id) =>
@@ -76,15 +166,15 @@ export default function NavigationBar() {
         } else {
           setNotifUsersById({});
         }
-      } catch (_) {
-        setNotifications([]);
+      } catch {
+        // Keep locally cached notifications visible even if API fails.
       } finally {
         setNotifLoading(false);
       }
     };
 
     loadNotifications();
-    const timer = setInterval(loadNotifications, 30000);
+    const timer = setInterval(loadNotifications, NOTIFICATIONS_REFRESH_MS);
     return () => clearInterval(timer);
   }, []);
 
@@ -101,12 +191,13 @@ export default function NavigationBar() {
   const handleOpenNotifications = async () => {
     const nextOpen = !notifOpen;
     setNotifOpen(nextOpen);
-    if (!notifOpen && notifications.length > 0) {
+    if (!notifOpen && unreadCount > 0) {
       const token = localStorage.getItem("token");
       if (token) {
         try {
           await markAllNotificationsAsRead(token);
-        } catch (_) {
+          setUnreadCount(0);
+        } catch {
           // Ignore backend errors, keep dropdown usable.
         }
       }
@@ -156,8 +247,8 @@ export default function NavigationBar() {
           title="Notifications"
         >
           🔔
-          {notifications.length > 0 && (
-            <span className="notif-badge">{notifications.length}</span>
+          {unreadCount > 0 && (
+            <span className="notif-badge">{unreadCount}</span>
           )}
         </button>
         {notifOpen && (
@@ -174,7 +265,7 @@ export default function NavigationBar() {
                     : `@${fromUser.username}`)
                   : "Un utilisateur";
                 return (
-                  <div key={n.id} className="notif-item">
+                  <div key={getNotificationKey(n)} className="notif-item">
                     <p className="notif-text">
                       {n.type || "Notification"} - {fromLabel}
                     </p>

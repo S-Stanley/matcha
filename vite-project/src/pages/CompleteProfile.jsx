@@ -10,23 +10,10 @@ const GENDER_TO_API = {
   "Ne se prononce pas": "DO NOT PRONONCE",
 };
 
-const API_TO_GENDER = {
-  MALE: "Homme",
-  FEMALE: "Femme",
-  OTHERS: "Autre",
-  "DO NOT PRONONCE": "Ne se prononce pas",
-};
-
 const PREFERENCE_TO_API = {
   Homme: "MALE",
   Femme: "FEMALE",
   "Les deux": "BOTH",
-};
-
-const API_TO_PREFERENCE = {
-  MALE: "Homme",
-  FEMALE: "Femme",
-  BOTH: "Les deux",
 };
 
 function CompleteProfile() {
@@ -79,8 +66,6 @@ function CompleteProfile() {
           ...prev,
           age: me.age ? String(me.age) : "",
           bio: me.bio || "",
-          gender: API_TO_GENDER[me.gender] || "",
-          preference: API_TO_PREFERENCE[me.preference] || "",
         }));
       } catch (_) {
         setError("Impossible de charger ton profil. Reconnecte-toi.");
@@ -273,7 +258,7 @@ function CompleteProfile() {
           <textarea
             value={answers[current.key]}
             onChange={handleChange}
-            className="step-input"
+            className="step-textarea-input"
           />
         )}
 
@@ -284,7 +269,7 @@ function CompleteProfile() {
             max={120}
             value={answers[current.key]}
             onChange={handleChange}
-            className="step-input"
+            className="step-number-input"
           />
         )}
 

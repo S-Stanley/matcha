@@ -170,6 +170,52 @@ function Profile() {
     return null;
   };
 
+  const loadActivity = async (token, silent = false) => {
+    try {
+      const [rawViews, rawLikes, users] = await Promise.all([
+        getViewsMe(token).catch(() => []),
+        getLikesMe(token).catch(() => []),
+        getUsers(token).catch(() => []),
+      ]);
+      const usersMap = {};
+      (Array.isArray(users) ? users : []).forEach((u) => {
+        usersMap[String(u.id)] = u;
+      });
+
+      const parsedViews = (Array.isArray(rawViews) ? rawViews : []).map((row) => ({
+        id: row?.[0] || null,
+        username: row?.[2] || "unknown",
+        firstname: row?.[4] || "",
+        lastname: row?.[3] || "",
+      }));
+      setViews(parsedViews);
+
+      const likerIds = (Array.isArray(rawLikes) ? rawLikes : [])
+        .map(getLikeUserId)
+        .filter(Boolean);
+
+      if (likerIds.length > 0) {
+        const likerProfiles = await Promise.all(
+          likerIds.map((id) =>
+            getUserById(token, id).catch(() => usersMap[String(id)] || {
+              id,
+              username: "unknown",
+              firstname: "",
+              lastname: "",
+            })
+          )
+        );
+        setLikes(likerProfiles);
+      } else {
+        setLikes([]);
+      }
+    } catch (err) {
+      if (!silent) {
+        setError(err?.message || "Impossible de charger l'activité.");
+      }
+    }
+  };
+
   useEffect(() => {
     const loadProfile = async () => {
       const token = localStorage.getItem("token");
@@ -180,46 +226,9 @@ function Profile() {
       }
 
       try {
-        const [me, rawViews, rawLikes, users] = await Promise.all([
-          getCurrentUser(token),
-          getViewsMe(token).catch(() => []),
-          getLikesMe(token).catch(() => []),
-          getUsers(token).catch(() => []),
-        ]);
-        const usersMap = {};
-        (Array.isArray(users) ? users : []).forEach((u) => {
-          usersMap[String(u.id)] = u;
-        });
-
+        const me = await getCurrentUser(token);
         hydrateProfile(me);
-
-        const parsedViews = (Array.isArray(rawViews) ? rawViews : []).map((row) => ({
-          id: row?.[0] || null,
-          username: row?.[2] || "unknown",
-          firstname: row?.[4] || "",
-          lastname: row?.[3] || "",
-        }));
-        setViews(parsedViews);
-
-        const likerIds = (Array.isArray(rawLikes) ? rawLikes : [])
-          .map(getLikeUserId)
-          .filter(Boolean);
-
-        if (likerIds.length > 0) {
-          const likerProfiles = await Promise.all(
-            likerIds.map((id) =>
-              getUserById(token, id).catch(() => usersMap[String(id)] || {
-                id,
-                username: "unknown",
-                firstname: "",
-                lastname: "",
-              })
-            )
-          );
-          setLikes(likerProfiles);
-        } else {
-          setLikes([]);
-        }
+        await loadActivity(token, true);
       } catch (err) {
         setError(err?.message || "Impossible de charger le profil.");
       } finally {
@@ -228,6 +237,35 @@ function Profile() {
     };
 
     loadProfile();
+  }, []);
+
+  useEffect(() => {
+    let timer = null;
+
+    const refreshActivity = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      await loadActivity(token, true);
+    };
+
+    refreshActivity();
+    timer = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refreshActivity();
+      }
+    }, 5000);
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshActivity();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      if (timer) clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, []);
 
   useEffect(() => {

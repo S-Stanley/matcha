@@ -251,14 +251,27 @@
 }
 
 @media (max-width: 900px) {
+  .message-container {
+    height: auto;
+    min-height: 100%;
+    overflow-y: auto;
+  }
+
+  .message-content {
+    height: auto;
+    min-height: 100%;
+    align-items: stretch;
+    padding: 12px;
+  }
+
   .chat-layout {
     grid-template-columns: 1fr;
     gap: 12px;
-    height: 100%;
+    height: auto;
   }
 
   .conversation-panel {
-    max-height: 220px;
+    max-height: none;
   }
 
   .conversation-list {
@@ -270,7 +283,8 @@
   }
 
   .chat-panel {
-    height: 100%;
+    height: auto;
+    min-height: 420px;
   }
 
   .chat-messages {

@@ -227,16 +227,23 @@ def get_user_by_id(user_id):
         if not connected_user:
             return "Error", 400
         user = handlers.get_user_by_id(user_id)
+        if not user:
+            return "Error", 404
         is_already_liked = handlers.is_user_liked(liked_user_id=user_id, connected_user_id=connected_user['id'])
         pictures = handlers.get_pictures_by_user_id(user_id)
+        tags = handlers.get_tags_by_user_id(user_id)
         return {
             "id": user['id'],
             "firstname": user['firstname'],
             "lastname": user['lastname'],
             "username": user['username'],
+            "bio": user['bio'],
+            "gender": user['gender'],
+            "preference": user['preference'],
             "popularity": user['popularity'],
             "city": user['city'],
             "age": user['age'],
+            "tags": tags,
             "pictures": pictures,
             "isLiked": is_already_liked,
             "last_login": user['last_login'],

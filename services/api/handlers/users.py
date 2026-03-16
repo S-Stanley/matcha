@@ -202,6 +202,25 @@ def is_tag_exist_for_user(user_id, tag):
         print(e)
         raise
 
+def get_tags_by_user_id(user_id):
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                sql.tags.GET_TAGS_BY_USER_ID,
+                (
+                    user_id,
+                )
+            )
+            req = cur.fetchall()
+            conn.commit()
+            if not req:
+                return []
+            return [row[0] for row in req if row and row[0]]
+    except Exception as e:
+        conn.rollback()
+        print(e)
+        raise
+
 def update_popularity_score(user_id, delta):
     try:
         with conn.cursor() as cur:
@@ -612,10 +631,13 @@ def get_user_by_id(user_id):
             "firstname": user[1],
             "lastname": user[2],
             "username": user[3],
-            "popularity": user[4],
-            "city": user[5],
-            "age": user[6],
-            "last_login": user[7],
+            "bio": user[4],
+            "gender": user[5],
+            "preference": user[6],
+            "popularity": user[7],
+            "city": user[8],
+            "age": user[9],
+            "last_login": user[10],
         }
     except Exception as e:
         conn.rollback()

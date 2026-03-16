@@ -88,28 +88,30 @@ function Message() {
         const data = await getMatches(token);
         const list = Array.isArray(data) ? data : [];
         setMatches(list);
+        const hasCurrent = list.some(
+          (m) => String(m.match_id || m.id) === String(selectedMatchId)
+        );
+        if (hasCurrent) {
+          return;
+        }
 
-        setSelectedMatchId((currentSelected) => {
-          const hasCurrent = list.some(
-            (m) => String(m.match_id || m.id) === String(currentSelected)
-          );
-          if (hasCurrent) return currentSelected;
+        const queryMatchId = searchParams.get("matchId");
+        const hasQuery = queryMatchId && list.some(
+          (m) => String(m.match_id || m.id) === String(queryMatchId)
+        );
+        if (hasQuery) {
+          setSelectedMatchId(String(queryMatchId));
+          return;
+        }
 
-          const queryMatchId = searchParams.get("matchId");
-          const hasQuery = queryMatchId && list.some(
-            (m) => String(m.match_id || m.id) === String(queryMatchId)
-          );
-          if (hasQuery) return String(queryMatchId);
-
-          const firstMatchId = list[0] ? String(list[0].match_id || list[0].id) : "";
-          if (firstMatchId) {
-            setSearchParams({ matchId: firstMatchId });
-          } else {
-            setSearchParams({});
-            setMessages([]);
-          }
-          return firstMatchId;
-        });
+        const firstMatchId = list[0] ? String(list[0].match_id || list[0].id) : "";
+        setSelectedMatchId(firstMatchId);
+        if (firstMatchId) {
+          setSearchParams({ matchId: firstMatchId });
+        } else {
+          setSearchParams({});
+          setMessages([]);
+        }
       } catch (_) {
         // Silent refresh failure; existing list remains displayed.
       }
@@ -118,7 +120,7 @@ function Message() {
     return () => {
       if (refreshTimer) clearInterval(refreshTimer);
     };
-  }, [navigate, searchParams, setSearchParams]);
+  }, [navigate, searchParams, selectedMatchId, setSearchParams]);
 
   const loadLikes = async () => {
     const token = localStorage.getItem("token");
@@ -265,27 +267,26 @@ function Message() {
       await deleteLike(token, likedUserId).catch(async () => {
         await blockUser(token, likedUserId).catch(() => null);
       });
-      setMatches((prev) => {
-        const nextMatches = prev.filter(
-          (m) => getMatchPeerUserId(m) !== String(likedUserId)
-        );
-        const currentStillExists = nextMatches.some(
-          (m) => String(m.match_id || m.id) === String(selectedMatchId)
-        );
-        if (!currentStillExists) {
-          const nextSelected = nextMatches[0]
-            ? String(nextMatches[0].match_id || nextMatches[0].id)
-            : "";
-          setSelectedMatchId(nextSelected);
-          if (nextSelected) {
-            setSearchParams({ matchId: nextSelected });
-          } else {
-            setSearchParams({});
-            setMessages([]);
-          }
+      const nextMatches = matches.filter(
+        (m) => getMatchPeerUserId(m) !== String(likedUserId)
+      );
+      setMatches(nextMatches);
+
+      const currentStillExists = nextMatches.some(
+        (m) => String(m.match_id || m.id) === String(selectedMatchId)
+      );
+      if (!currentStillExists) {
+        const nextSelected = nextMatches[0]
+          ? String(nextMatches[0].match_id || nextMatches[0].id)
+          : "";
+        setSelectedMatchId(nextSelected);
+        if (nextSelected) {
+          setSearchParams({ matchId: nextSelected });
+        } else {
+          setSearchParams({});
+          setMessages([]);
         }
-        return nextMatches;
-      });
+      }
       await loadLikes();
     } catch (err) {
       setError(err?.message || "Impossible de supprimer ce profil.");

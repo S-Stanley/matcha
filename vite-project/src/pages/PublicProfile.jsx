@@ -4,6 +4,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { blockUser, createView, deleteLike, getLikesMe, getMatches, getUserById, getUsers, reportUser } from "../api";
 
 const API_URL = "http://127.0.0.1:5000";
+const API_TO_GENDER = {
+  MALE: "Homme",
+  FEMALE: "Femme",
+  OTHERS: "Autre",
+  "DO NOT PRONONCE": "Ne se prononce pas",
+};
+
+const API_TO_PREFERENCE = {
+  MALE: "Hommes",
+  FEMALE: "Femmes",
+  BOTH: "Les deux",
+};
 
 function PublicProfile() {
   const navigate = useNavigate();
@@ -188,8 +200,27 @@ function PublicProfile() {
               <p className="public-meta"><strong>Prénom:</strong> {profile.firstname || "Non renseigné"}</p>
               <p className="public-meta"><strong>Pseudo:</strong> @{profile.username || "unknown"}</p>
               <p className="public-meta"><strong>Âge:</strong> {profile.age ?? "Non renseigné"}</p>
+              <p className="public-meta"><strong>Genre:</strong> {API_TO_GENDER[profile.gender] || "Non renseigné"}</p>
+              <p className="public-meta"><strong>Préférence:</strong> {API_TO_PREFERENCE[profile.preference] || "Non renseigné"}</p>
+              <p className="public-meta"><strong>Ville:</strong> {profile.city || "Non renseignée"}</p>
               <p className="public-meta"><strong>Popularité:</strong> {profile.popularity ?? 0}</p>
               <p className="public-meta public-meta-full"><strong>Dernière connexion:</strong> {lastLoginLabel}</p>
+              <p className="public-meta public-meta-full">
+                <strong>Bio:</strong> {profile.bio || "Aucune bio renseignée."}
+              </p>
+            </div>
+            <div className="public-tags-wrap">
+              <p className="public-tags-title">Centres d’intérêt</p>
+              <div className="public-tags">
+                {(Array.isArray(profile.tags) ? profile.tags : []).length === 0 && (
+                  <span className="public-tag-empty">Aucun tag</span>
+                )}
+                {(Array.isArray(profile.tags) ? profile.tags : []).map((tag) => (
+                  <span key={tag} className="public-tag">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
             </div>
             <div className="public-status-row">
               {relation.likedYou && <span className="public-status-pill liked-you">Vous a liké</span>}

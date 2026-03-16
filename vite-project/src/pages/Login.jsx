@@ -111,7 +111,7 @@ function Login() {
         username: resetUsername,
         confirmCode: resetCode,
       });
-      if (!data?.Updated) {
+      if (!data?.updated) {
         throw new Error("Code invalide.");
       }
       setMessage("Mot de passe mis à jour. Tu peux te connecter.");

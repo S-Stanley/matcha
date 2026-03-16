@@ -7,6 +7,12 @@ const AGE_MIN = 18;
 const AGE_MAX = 99;
 const POP_MIN = 0;
 const POP_MAX = 300;
+const SEARCH_FILTERS_STORAGE_KEY = "recherche_filters_v1";
+const SORT_LABELS = {
+  age: "Âge",
+  popularity: "Popularité",
+  city: "Localisation",
+};
 
 const AVAILABLE_TAGS = [
   { label: "Sport", value: "sport" },
@@ -23,14 +29,51 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
+function loadSavedFilters() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const raw = sessionStorage.getItem(SEARCH_FILTERS_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+
+    const ageMin = clamp(Number(parsed.ageMin), AGE_MIN, AGE_MAX);
+    const ageMax = clamp(Number(parsed.ageMax), AGE_MIN, AGE_MAX);
+    const popularityMin = clamp(Number(parsed.popularityMin), POP_MIN, POP_MAX);
+    const popularityMax = clamp(Number(parsed.popularityMax), POP_MIN, POP_MAX);
+    const sortBy = ["age", "popularity", "city"].includes(parsed.sortBy) ? parsed.sortBy : "";
+    const orderBy = parsed.orderBy === "asc" ? "asc" : "desc";
+
+    return {
+      ageMin: Number.isFinite(ageMin) ? ageMin : AGE_MIN,
+      ageMax: Number.isFinite(ageMax) ? ageMax : AGE_MAX,
+      popularityMin: Number.isFinite(popularityMin) ? popularityMin : POP_MIN,
+      popularityMax: Number.isFinite(popularityMax) ? popularityMax : POP_MAX,
+      location: typeof parsed.location === "string" ? parsed.location : "",
+      selectedTags: Array.isArray(parsed.selectedTags)
+        ? parsed.selectedTags.filter((tag) => typeof tag === "string")
+        : [],
+      sortBy,
+      orderBy: sortBy ? orderBy : "desc",
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
 function Recherche() {
   const navigate = useNavigate();
-  const [ageMin, setAgeMin] = useState(18);
-  const [ageMax, setAgeMax] = useState(99);
-  const [popularityMin, setPopularityMin] = useState(POP_MIN);
-  const [popularityMax, setPopularityMax] = useState(POP_MAX);
-  const [location, setLocation] = useState("");
-  const [selectedTags, setSelectedTags] = useState([]);
+  const savedFilters = useMemo(() => loadSavedFilters(), []);
+  const [ageMin, setAgeMin] = useState(savedFilters?.ageMin ?? AGE_MIN);
+  const [ageMax, setAgeMax] = useState(savedFilters?.ageMax ?? AGE_MAX);
+  const [popularityMin, setPopularityMin] = useState(savedFilters?.popularityMin ?? POP_MIN);
+  const [popularityMax, setPopularityMax] = useState(savedFilters?.popularityMax ?? POP_MAX);
+  const [location, setLocation] = useState(savedFilters?.location ?? "");
+  const [selectedTags, setSelectedTags] = useState(savedFilters?.selectedTags ?? []);
+  const [sortBy, setSortBy] = useState(savedFilters?.sortBy ?? "");
+  const [orderBy, setOrderBy] = useState(savedFilters?.orderBy ?? "desc");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -45,12 +88,17 @@ function Recherche() {
   };
 
   const reset = () => {
-    setAgeMin(18);
-    setAgeMax(99);
+    setAgeMin(AGE_MIN);
+    setAgeMax(AGE_MAX);
     setPopularityMin(POP_MIN);
     setPopularityMax(POP_MAX);
     setLocation("");
     setSelectedTags([]);
+    setSortBy("");
+    setOrderBy("desc");
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem(SEARCH_FILTERS_STORAGE_KEY);
+    }
   };
 
   const filters = useMemo(() => {
@@ -67,9 +115,13 @@ function Recherche() {
     if (selectedTags.length > 0) {
       f.tags = selectedTags.join(",");
     }
+    if (sortBy) {
+      f.sortBy = sortBy;
+      f.orderBy = orderBy;
+    }
 
     return f;
-  }, [ageMin, ageMax, popularityMin, popularityMax, location, selectedTags]);
+  }, [ageMin, ageMax, popularityMin, popularityMax, location, selectedTags, sortBy, orderBy]);
 
   const readableSearchError = (err) => {
     const raw = String(err?.message || "");
@@ -113,6 +165,23 @@ function Recherche() {
   const apply = () => {
     fetchResults(filters);
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    sessionStorage.setItem(
+      SEARCH_FILTERS_STORAGE_KEY,
+      JSON.stringify({
+        ageMin,
+        ageMax,
+        popularityMin,
+        popularityMax,
+        location,
+        selectedTags,
+        sortBy,
+        orderBy,
+      })
+    );
+  }, [ageMin, ageMax, popularityMin, popularityMax, location, selectedTags, sortBy, orderBy]);
 
   const onAgeMinChange = (v) => {
     const next = clamp(Number(v), AGE_MIN, ageMax);
@@ -173,8 +242,18 @@ function Recherche() {
         },
       });
     }
+    if (sortBy) {
+      chips.push({
+        key: "sort",
+        label: `Tri: ${SORT_LABELS[sortBy] || sortBy} (${orderBy === "asc" ? "asc" : "desc"})`,
+        onClear: () => {
+          setSortBy("");
+          setOrderBy("desc");
+        },
+      });
+    }
     return chips;
-  }, [location, selectedTags, ageMin, ageMax, popularityMin, popularityMax]);
+  }, [location, selectedTags, ageMin, ageMax, popularityMin, popularityMax, sortBy, orderBy]);
 
   return (
     <div className="recherche-container">
@@ -332,6 +411,37 @@ function Recherche() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 />
+              </div>
+
+              <div className="filter-section">
+                <div className="filter-row">
+                  <span className="filter-label">Tri</span>
+                </div>
+                <div className="sort-row">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSortBy(value);
+                      if (!value) {
+                        setOrderBy("desc");
+                      }
+                    }}
+                  >
+                    <option value="">Pertinence</option>
+                    <option value="age">Âge</option>
+                    <option value="popularity">Popularité</option>
+                    <option value="city">Localisation</option>
+                  </select>
+                  <select
+                    value={orderBy}
+                    disabled={!sortBy}
+                    onChange={(e) => setOrderBy(e.target.value)}
+                  >
+                    <option value="desc">Descendant</option>
+                    <option value="asc">Ascendant</option>
+                  </select>
+                </div>
               </div>
 
               <div className="filter-section">

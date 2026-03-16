@@ -132,6 +132,39 @@
   grid-column: 1 / -1;
 }
 
+.public-tags-wrap {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.public-tags-title {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.public-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.public-tag {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #ffd8e2;
+  background: #fff2f6;
+  color: #a21d4c;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.public-tag-empty {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
 .public-actions {
   margin-top: 16px;
   display: flex;

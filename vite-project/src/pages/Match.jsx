@@ -72,6 +72,7 @@ function Match() {
             connected: connectedIds.includes(String(user.id)),
           }));
         setProfiles(list);
+        setIndex(0);
         if (list.length > 0) {
           await createView(token, list[0].id).catch(() => null);
         }
