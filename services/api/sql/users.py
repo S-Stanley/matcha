@@ -1,6 +1,6 @@
 UPDATE_POPULARITY_SCORE = '''
     UPDATE "User"
-    SET popularity = popularity + %s::integer
+    SET popularity = LEAST(300, GREATEST(0, popularity + %s::integer))
     WHERE id = %s
 '''
 
