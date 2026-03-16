@@ -149,6 +149,7 @@
     text-align: left;
     overflow: hidden;
     padding-right: 10px;
+    overflow: scroll;
 }
   
 .filter-title {
