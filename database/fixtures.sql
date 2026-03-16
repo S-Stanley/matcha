@@ -75,5 +75,5 @@ FROM (
     random() * 100 as popularity,
     'hXgGAY2u4XNu/UpAcqHjOuyytNs.DvXf0iLE0.5R6OiFh7bMaH21q' as password, -- pass
     gen_random_uuid() as token
-  FROM generate_series(1, 20) AS item
+  FROM generate_series(1, 500) AS item
 ) as sub
